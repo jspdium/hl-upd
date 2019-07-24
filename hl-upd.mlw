@@ -1,0 +1,1362 @@
+
+
+
+(* Propositional Hoare logic with updates *)
+
+
+theory ImpLanguage
+
+use export map.Map 
+use export int.Int
+
+
+(* identifiers *)
+
+type ident = 
+   | MkIdent int
+
+
+       
+(* expressions *)
+
+type operator = Oplus | Ominus | Omult
+
+type expr =
+  | Econst int
+  | Evar ident
+  | Ebin expr operator expr
+
+
+(* Boolean expressions *)
+
+type boperator = BOeq | BOlt | BOlteq | BOgt | BOgteq 
+
+type bexpr =
+     | Bcomp expr boperator expr
+     | Btrue
+     | Bfalse
+     | Band bexpr bexpr
+     | Bor bexpr bexpr
+     | Bnot bexpr
+
+
+(* program states *) 
+
+type state = map ident int
+
+(* evaluation of expressions *) 
+
+function eval_bin (x:int) (op:operator) (y:int) : int =
+match op with
+      | Oplus -> x+y
+      | Ominus -> x-y
+      | Omult -> x*y
+end
+
+function eval_expr (s:state) (e:expr) : int =
+match e with
+      | Econst n -> n
+      | Evar x -> get s x
+      | Ebin e1 op e2 ->
+      	eval_bin (eval_expr s e1) op (eval_expr s e2)
+end
+
+predicate eval_bop (x:int) (bop:boperator) (y:int) =
+match bop with
+      | BOeq -> x = y
+      | BOlt -> x < y
+      | BOlteq -> x <= y
+      | BOgt -> x > y
+      | BOgteq -> x >= y
+end  
+
+
+(* Boolean expressions *)
+(* could be intepreted as Why3 bool instead *)
+
+predicate eval_bexpr (s:state) (b:bexpr) =
+match b with
+      | Bcomp e1 bop e2 -> eval_bop  (eval_expr s e1) bop (eval_expr s e2) 
+      | Btrue -> true 
+      | Bfalse -> false
+      | Band b1 b2 -> (eval_bexpr s b1) /\ (eval_bexpr s b2) 
+      | Bor b1 b2 ->  (eval_bexpr s b1) \/ (eval_bexpr s b2) 
+      | Bnot b1 -> not (eval_bexpr s b1) 
+end
+
+
+
+
+
+(* formulas - extension of bexpr *)
+(* no quantifiers for now *)
+
+type fmla =
+     | Fcomp expr boperator expr
+     | Fembed bexpr
+     | Ftrue
+     | Ffalse
+     | Fand fmla fmla
+     | For fmla fmla
+     | Fnot fmla
+     | Fimplies fmla fmla
+
+
+(* semantics of formulas *)
+
+predicate satisfies (s:state) (p:fmla) =
+match p with
+      | Fcomp e1 bop e2 -> eval_bop  (eval_expr s e1) bop (eval_expr s e2) 
+      | Fembed b ->  (eval_bexpr s b)
+      | Ftrue -> true 
+      | Ffalse -> false
+      | Fand p1 p2 -> (satisfies s p1) /\ (satisfies s p2) 
+      | For p1 p2 -> (satisfies s p1) \/ (satisfies s p2) 
+      | Fnot p1 -> not (satisfies s p1) 
+      | Fimplies p1 p2 -> (not (satisfies s p1)) \/ (satisfies s p2) 
+end
+
+predicate valid_fmla (p:fmla) = forall s:state. satisfies s p
+
+
+(* required by one of the VCs for completeness *)
+
+lemma deduction:
+      forall p q :fmla.
+      (forall s: state. satisfies s p -> satisfies s q)
+      ->
+      valid_fmla (Fimplies p q)
+
+
+
+
+(* programs include invariants as annotations *)
+
+type stmt = 
+     | Sskip
+     | Sassign ident expr
+     | Sif bexpr stmt stmt
+     | Swhile bexpr fmla stmt  
+     | Sseq stmt stmt
+
+
+
+(* This notion of size of programs will be useful   *)
+(* to construct variants because of the seqseq rule *)
+
+function size (c:stmt) : int =
+match c with
+| Sskip -> 1
+| Sassign _ _ -> 1
+| Sif _ c1 c2 -> 1 + size c1 + size c2
+| Sseq c1 c2 -> 1 + 2*size c1 + size c2
+| Swhile _ _ c -> 1 + size c
+end
+
+
+(* 3 ways to prove size c >= 0 for all c *)
+
+(* induction_ty_lex *)
+(* lemma size_pos : forall c[@induction] :stmt. size c >= 0 *)
+
+let rec lemma size_posLF (c:stmt) =
+    ensures { size c >= 0 } 
+match c with
+| Sskip -> ()
+| Sassign _ _ -> ()
+| Sif _ c1 c2 -> size_posLF c1 ; size_posLF c2
+| Sseq c1 c2 -> size_posLF c1 ; size_posLF c2
+| Swhile _ _ c -> size_posLF c
+end
+
+
+(* An alternative would be to define size as a program function *)
+(* [could be ghost] *)
+
+let rec function sizeC (c:stmt) : int =
+    ensures { result >= 0 }
+match c with
+| Sskip -> 1
+| Sassign _ _ -> 1
+| Sif _ c1 c2 -> 1 + sizeC c1 + sizeC c2
+| Sseq c1 c2 -> 1 + 2*sizeC c1 + sizeC c2
+| Swhile _ _ c -> 1 + sizeC c
+end
+
+
+
+
+(* Natural Semantics *)
+
+inductive big_step state stmt state =
+| big_step_skip:
+  forall s:state. big_step s Sskip s
+      
+| big_step_assign:
+  forall s:state, e:expr, x:ident.
+  	 big_step s (Sassign x e) (set s x (eval_expr s e))  
+
+| big_step_seq:
+  forall s1 s2 s3:state, c1 c2:stmt.
+  	 big_step s1 c1 s2  ->
+  	 big_step s2 c2 s3  ->
+  	 big_step s1 (Sseq c1 c2) s3 
+
+| big_step_if_true: 
+  forall s s':state, b:bexpr, c1 c2:stmt.
+  	 eval_bexpr s b ->
+         big_step s c1 s'-> 
+         big_step s (Sif b c1 c2) s'
+
+| big_step_if_false: 
+  forall s s':state, b:bexpr, c1 c2:stmt.
+  	 not (eval_bexpr s b) ->
+         big_step s c2 s' -> 
+         big_step s (Sif b c1 c2) s'
+
+| big_step_while_true:
+  forall s s' s'':state, b:bexpr, i:fmla, c:stmt.
+      	 eval_bexpr s b ->
+         big_step s c s'  ->
+         big_step s' (Swhile b i c) s'' ->
+         big_step s (Swhile b i c) s'' 
+
+| big_step_while_false:
+  forall s:state, b:bexpr, i:fmla, c:stmt.
+      	 not (eval_bexpr s b) ->
+         big_step s (Swhile b i c) s
+
+
+
+(* not required but a nice example of using two forms of induction *)
+(* use induction_ty_lex then induction_pr for the loop case *)
+
+lemma deterministic_execution : forall c [@induction]:stmt, s s' s'' :state.
+      (big_step s c s') ->  (big_step s c s'') -> s' = s''
+
+
+
+(* Required for soundness *)
+
+lemma AssignSeq: 
+forall x :ident, e :expr, c :stmt, s s' :state.
+       big_step s (Sseq (Sassign x e) c) s' ->
+       big_step (set s x (eval_expr s e)) c s' 
+
+lemma IfSeqTrue:
+forall b :bexpr, c1 c2 c :stmt, s s' :state.
+       big_step s (Sseq (Sif b c1 c2) c) s' -> 
+       eval_bexpr s b -> big_step s (Sseq c1 c) s'
+ 
+lemma IfSeqFalse:
+forall b :bexpr, c1 c2 c :stmt, s s' :state.
+       big_step s (Sseq (Sif b c1 c2) c) s' -> 
+       eval_bexpr s (Bnot b) -> big_step s (Sseq c2 c) s' 
+
+
+
+(* Required for soundness and completeness *)
+
+lemma SeqSeq:
+forall c1 c2 c:stmt, s s' :state.
+       big_step s (Sseq c1 (Sseq c2 c)) s'
+       <->
+       big_step s (Sseq (Sseq c1 c2) c) s'
+
+end
+
+
+
+
+
+
+
+
+theory Updates 
+
+use ImpLanguage
+
+(* updates are (total) mappings *)
+  
+type upd = map ident expr
+
+
+(* The empty update will be represented as the identity mapping       *)
+
+let constant idUpd : upd =
+             fun (x:ident) -> Evar x
+
+predicate isId (u:upd) =
+	  forall a: ident. get u a = Evar a
+
+
+
+(* update application to states *) 
+
+function applyS (u:upd) (s:state) : state = 
+	 fun (x:ident) -> eval_expr s (u x) 
+
+lemma applySId:
+      forall u :upd, s :state.
+      isId u -> applyS u s = s
+
+
+(* update application to expressions  *)
+
+let rec function applyE (u:upd) (e:expr) : expr =
+    ensures { forall s :state. eval_expr s result = eval_expr (applyS u s) e }
+    variant { e }
+match e with
+      | Econst n -> Econst n
+      | Evar x -> get u x
+      | Ebin e1 op e2 -> Ebin (applyE u e1) op (applyE u e2)
+ end
+
+
+(* could be logic function + lemma   *)
+
+(* lemma exprUpdate: forall s:state, e[@induction]:expr, u: upd. *)
+(*       		  eval_expr s (applyE u e) = eval_expr (applyS u s) e *)
+
+(* let rec lemma exprUpdateLF  (s:state) (e: expr) (u: upd) : unit *)
+(*     ensures { eval_expr s (applyE u e) = eval_expr (applyS u s) e } *)
+(*     variant { e } *)
+(* = match e with *)
+(*       | Econst _ -> () *)
+(*       | Evar _ -> () *)
+(*       | Ebin e1 _ e2 -> exprUpdateLF s e1 u; exprUpdateLF s e2 u *)
+(* end *)
+
+
+
+
+
+
+(* lemma applyEId: *)
+(*       forall u :upd, e[@induction] :expr. *)
+(*       isId u -> applyE u e = e *)
+
+let rec lemma applyEIdLF (u:upd) (e:expr) 
+    requires { isId u }
+    ensures  { applyE u e = e }
+= match e with
+      | Econst _ -> ()
+      | Evar _ -> ()
+      | Ebin e1 _ e2 -> applyEIdLF u e1 ; applyEIdLF u e2
+end
+
+
+(* update application to Boolean expressions *)
+
+let rec ghost function applyB (u:upd) (b:bexpr) : bexpr =
+    ensures { forall s :state. eval_bexpr s result <-> eval_bexpr (applyS u s) b }
+    variant { b }
+match b with
+      | Bcomp e1 bop e2 -> Bcomp (applyE u e1) bop (applyE u e2) 
+      | Btrue -> Btrue
+      | Bfalse -> Bfalse
+      | Band b1 b2 -> Band (applyB u b1) (applyB u b2) 
+      | Bor b1 b2 -> Bor (applyB u b1) (applyB u b2) 
+      | Bnot b1 -> Bnot (applyB u b1) 
+end
+
+
+
+(* lemma applyBId: *)
+(*       forall u :upd, b[@induction] :bexpr. *)
+(*       isId u -> applyB u b = b *)
+
+let rec lemma applyBIdLF (u:upd) (b:bexpr) 
+    requires { isId u }
+    ensures { applyB u b = b }
+= match b with
+      | Bcomp _ _ _  -> ()
+      | Btrue -> ()
+      | Bfalse -> ()
+      | Band b1 b2 -> applyBIdLF u b1 ; applyBIdLF u b2
+      | Bor b1 b2 -> applyBIdLF u b1 ; applyBIdLF u b2
+      | Bnot b1 -> applyBIdLF u b1
+end
+
+
+
+
+(* update application to formulas *)
+
+let rec ghost function applyF (u:upd) (p:fmla) : fmla =
+    ensures { forall s :state. satisfies s result <-> satisfies (applyS u s) p }
+    variant { p }
+match p with
+      | Fcomp e1 bop e2 -> Fcomp (applyE u e1) bop (applyE u e2) 
+      | Fembed b ->  Fembed (applyB u b)
+      | Ftrue -> Ftrue
+      | Ffalse -> Ffalse
+      | Fand p1 p2 ->  Fand (applyF u p1) (applyF u p2) 
+      | For p1 p2 ->  For (applyF u p1) (applyF u p2) 
+      | Fnot p1 -> Fnot (applyF u p1) 
+      | Fimplies p1 p2 -> Fimplies (applyF u p1) (applyF u p2) 
+end
+
+
+(* lemma applyFId: *)
+(*       forall u :upd, p[@induction] :fmla. *)
+(*       isId u -> applyF u p = p *)
+
+let rec lemma applyFIdLF (u:upd) (p:fmla) 
+    requires { isId u }
+    ensures { applyF u p = p }
+= match p with
+      | Fcomp _ _ _  -> ()
+      | Fembed _ ->  ()
+      | Ftrue -> ()
+      | Ffalse -> ()
+      | Fand p1 p2 -> applyFIdLF u p1 ; applyFIdLF u p2
+      | For p1 p2 -> applyFIdLF u p1 ; applyFIdLF u p2
+      | Fnot p1 -> applyFIdLF u p1
+      | Fimplies p1 p2 -> applyFIdLF u p1 ; applyFIdLF u p2
+end
+
+
+
+(* "update update" with an assignment *)
+(* If defined as program function it would necessarily *)
+(* be ghost since the map set function is ghost *)
+
+function assign (u:upd) (x:ident) (e:expr) : upd =
+	 set u x (applyE u e)
+
+
+(* interaction between assignment and application of update to state *)
+
+lemma applySAssign :
+      forall  x: ident, e: expr, u: upd, s: state.
+      applyS (assign u x e) s = let s' = applyS u s
+      	     	       	      	in set s' x (eval_expr s' e)
+
+
+
+(* Some tests... *)
+
+goal AssignTest1 :
+     let x = MkIdent 0 in
+     let u = (fun _ -> Econst 2) in                     (* constant update in two differente senses... *)
+     let u = assign u x (Ebin (Evar x) Oplus (Econst 13)) in
+     get u x =  (Ebin (Econst 2) Oplus (Econst 13)) 
+
+goal AssignTest2 :
+     let x = MkIdent 0 in
+     let u = idUpd in                                   (* identity update *)
+     let u = assign u x (Ebin (Evar x) Oplus (Econst 10)) in
+     let u = assign u x (Ebin (Evar x) Oplus (Econst 20)) in
+     get u x = Ebin (Ebin (Evar x) Oplus (Econst 10)) Oplus (Econst 20)
+
+goal AssignTestSwap :
+     let x = MkIdent 0 in
+     let y = MkIdent 1 in
+     let t = MkIdent 2 in
+     let u = idUpd in
+     let u = assign u t (Evar x) in
+     let u = assign u x (Evar y) in
+     let u = assign u y (Evar t) in
+     (get u y = Evar x) /\  (get u x = Evar y) 
+                                                                                               
+goal AssignTestSwap2 :
+     forall x y t :ident, u u1 u2 u3 :upd.
+     x <> t -> y <> t ->                                      
+     isId u ->
+     u1 = assign u t (Evar x) -> 
+     u2 = assign u1 x (Evar y) -> 
+     u3 = assign u2 y (Evar t) -> 
+     (get u3 y = Evar x) /\ (get u3 x = Evar y) 
+
+end
+
+
+
+
+theory Semantics
+
+use export ImpLanguage
+use export Updates
+
+
+(* Hoare triples *) 
+
+predicate valid_triple (p:fmla) (u:upd) (c:stmt) (q:fmla) = 
+	  forall s s' :state.
+	  	 satisfies s p ->	
+		 big_step (applyS u s) c s' ->
+		 satisfies s' q
+
+
+
+(* Example triples tested for validity *)
+
+goal TestValidTripleSimpleProg1 :
+     let x = MkIdent 0 in
+     let y = MkIdent 1 in
+     let prog = Sseq (Sassign y (Ebin (Evar y) Oplus (Econst 10))) Sskip in 
+     let p = Fcomp (Evar y) BOeq (Evar x) in
+     let q = Fcomp (Evar y) BOeq (Ebin (Evar x) Oplus (Econst 10)) in
+     valid_triple p idUpd prog q
+
+
+goal TestValidTripleSimpleProg2 :
+     let x = MkIdent 0 in
+     let y = MkIdent 1 in
+     let prog = Sseq (Sassign y (Ebin (Evar y) Oplus (Econst 10))) Sskip in 
+     let p = Fcomp (Evar y) BOeq (Evar x) in
+     let q = Fcomp (Evar y) BOeq (Ebin (Evar x) Oplus (Econst 10)) in
+     valid_triple p idUpd prog q
+
+
+goal TestValidTripleSwapProg :
+     let x = MkIdent 0 in
+     let y = MkIdent 1 in
+     let t = MkIdent 2 in
+     let a = MkIdent 3 in
+     let b = MkIdent 4 in
+     let swap = Sseq (Sassign t (Evar x))
+     	      	     (Sseq (Sassign x (Evar y))
+		     	   (Sassign y (Evar t))) in
+     let p = Fand (Fcomp (Evar x) BOeq (Evar a)) (Fcomp (Evar y) BOeq (Evar b)) in
+     let q = Fand (Fcomp (Evar y) BOeq (Evar a)) (Fcomp (Evar x) BOeq (Evar b)) in
+     valid_triple p idUpd swap q
+
+
+goal TestValidTripleAltSwapProg :
+     let x = MkIdent 0 in
+     let y = MkIdent 1 in
+     let t = MkIdent 2 in
+     let a = MkIdent 3 in
+     let b = MkIdent 4 in
+     let swap = Sseq (Sseq (Sassign t (Evar x))
+     	      	     	   (Sassign x (Evar y)))
+		     (Sassign y (Evar t)) in
+     let p = Fand (Fcomp (Evar x) BOeq (Evar a)) (Fcomp (Evar y) BOeq (Evar b)) in
+     let q = Fand (Fcomp (Evar y) BOeq (Evar a)) (Fcomp (Evar x) BOeq (Evar b)) in
+     valid_triple p idUpd swap q
+
+end
+
+
+
+
+
+theory SystemHu
+
+use Semantics
+
+
+(* Inference system of Hoare Logic with Updates   *)
+(* DOES NOT MAKE USE OF ANNOTATED LOOP INVARIANTS *)
+ 
+inductive infHu fmla upd stmt fmla =
+
+| infHu_skip:
+  forall p q :fmla, u :upd. 
+  valid_fmla (Fimplies p (applyF u q)) ->
+  infHu p u Sskip q
+
+| infHu_assign:
+  forall p :fmla, q :fmla, x :ident, e :expr, u :upd.
+       valid_fmla (Fimplies p (applyF (assign u x e) q))  -> 
+       infHu p u (Sassign x e) q
+
+| infHu_if:
+  forall p q :fmla, c1 c2 :stmt, b :bexpr, u :upd.
+  	 infHu (Fand p (applyF u (Fembed b))) u c1 q -> 
+  	 infHu (Fand p (applyF u (Fnot (Fembed b)))) u c2 q -> 
+  	 infHu p u (Sif b c1 c2) q
+
+| infHu_while:
+  forall p q :fmla, c :stmt, b :bexpr, inv ainv :fmla, u :upd.
+  	 valid_fmla (Fimplies p (applyF u inv)) -> 
+         infHu (Fand inv (Fembed b)) idUpd c inv -> 
+  	 valid_fmla (Fimplies (Fand inv (Fnot (Fembed b))) q) -> 
+  	 infHu p u (Swhile b ainv c) q
+
+| infHu_skipseq:
+  forall p q :fmla, u :upd, c :stmt. 
+  infHu p u c q ->
+  infHu p u (Sseq Sskip c) q
+
+| infHu_assignseq:
+  forall p :fmla, q :fmla, x :ident, e :expr, c :stmt, u :upd.
+       infHu p (assign u x e) c q -> 
+       infHu p u (Sseq (Sassign x e) c) q
+
+| infHu_ifseq:
+  forall p q :fmla, c1 c2 c :stmt, b :bexpr, u :upd.
+  	 infHu (Fand p (applyF u (Fembed b))) u (Sseq c1 c) q -> 
+  	 infHu (Fand p (applyF u (Fnot (Fembed b)))) u (Sseq c2 c) q -> 
+  	 infHu p u (Sseq (Sif b c1 c2) c) q
+
+| infHu_whileseq:
+  forall p q :fmla, c cc :stmt, b :bexpr, inv ainv :fmla, u :upd.
+  	 valid_fmla (Fimplies p (applyF u inv)) -> 
+         infHu (Fand inv (Fembed b)) idUpd c inv -> 
+  	 infHu (Fand inv (Fnot (Fembed b))) idUpd cc q -> 
+  	 infHu p u (Sseq (Swhile b ainv c) cc) q
+
+| infHu_seqseq:
+  forall p q :fmla, c1 c2 c :stmt, u :upd.
+  	 infHu p u (Sseq c1 (Sseq c2 c)) q ->
+  	 infHu p u (Sseq (Sseq c1 c2) c) q
+
+
+
+
+(* Example inferences *)
+
+goal TestInfSimpleProg1 :
+     let x = MkIdent 0 in
+     let y = MkIdent 1 in
+     let prog = Sseq (Sassign y (Ebin (Evar y) Oplus (Econst 10))) Sskip in 
+     let p = Fcomp (Evar y) BOeq (Evar x) in
+     let q = Fcomp (Evar y) BOeq (Ebin (Evar x) Oplus (Econst 10)) in
+     infHu p idUpd prog q
+
+
+goal TestInfSimpleProg2 :
+     let x = MkIdent 0 in
+     let y = MkIdent 1 in
+     let prog = Sseq (Sassign y (Ebin (Evar y) Oplus (Econst 10))) Sskip in 
+     let p = Fcomp (Evar y) BOeq (Evar x) in
+     let q = Fcomp (Evar y) BOeq (Ebin (Evar x) Oplus (Econst 10)) in
+     infHu p idUpd prog q
+
+
+goal TestInfSwapProg :
+     let x = MkIdent 0 in
+     let y = MkIdent 1 in
+     let t = MkIdent 2 in
+     let a = MkIdent 3 in
+     let b = MkIdent 4 in
+     let swap = Sseq (Sassign t (Evar x))
+     	      	(Sseq  (Sassign x (Evar y))
+		(Sseq (Sassign y (Evar t))
+		 Sskip)) in
+     let p = Fand (Fcomp (Evar x) BOeq (Evar a)) (Fcomp (Evar y) BOeq (Evar b)) in
+     let q = Fand (Fcomp (Evar y) BOeq (Evar a)) (Fcomp (Evar x) BOeq (Evar b)) in
+     infHu p idUpd swap q
+
+
+goal TestInfAltSwapProg :
+     let x = MkIdent 0 in
+     let y = MkIdent 1 in
+     let t = MkIdent 2 in
+     let a = MkIdent 3 in
+     let b = MkIdent 4 in
+     let swap = Sseq (Sseq  (Sassign t (Evar x))
+     	      	     	    (Sassign x (Evar y)))
+		     (Sassign y (Evar t)) in
+     let p = Fand (Fcomp (Evar x) BOeq (Evar a)) (Fcomp (Evar y) BOeq (Evar b)) in
+     let q = Fand (Fcomp (Evar y) BOeq (Evar a)) (Fcomp (Evar x) BOeq (Evar b)) in
+     infHu p idUpd swap q
+
+end
+
+
+
+theory HuSoundness
+
+use Semantics
+use SystemHu
+
+
+(* The following three lemmas are required *)
+
+(* the first is proved using "induction_pr" after "unfold valid_triple *)
+(* the others follow from the first without induction *)
+
+lemma core_while_rule:
+forall c:stmt, b:bexpr, inv :fmla.
+       valid_triple (Fand inv (Fembed b)) idUpd c inv ->
+       forall ainv:fmla. valid_triple inv idUpd (Swhile b ainv c) (Fand inv (Fnot (Fembed b)))
+
+lemma while_rule:
+forall c:stmt, u:upd, b:bexpr, inv ainv p q :fmla.
+       valid_triple (Fand inv (Fembed b)) idUpd c inv ->
+       valid_fmla (Fimplies p (applyF u inv)) ->
+       valid_fmla (Fimplies (Fand inv (Fnot (Fembed b))) q) ->
+       valid_triple p u (Swhile b ainv c) q
+
+lemma seq_while_rule:
+forall c cc:stmt, b:bexpr, u:upd, p q inv ainv :fmla.
+       valid_fmla (Fimplies p (applyF u inv)) ->
+       valid_triple (Fand inv (Fembed b)) idUpd c inv ->
+       valid_triple (Fand inv (Fnot (Fembed b))) idUpd cc q ->
+       valid_triple p u (Sseq (Swhile b ainv c) cc) q
+
+
+
+(* proved with "induction_pr" *)
+
+lemma infHu_sound :
+forall c :stmt, u :upd, p q :fmla.
+       infHu p u c q -> valid_triple p u c q
+
+end
+
+
+
+
+theory HuSoundness_LF
+
+use Semantics
+use SystemHu
+
+
+(* Alternative proof using a lemma function *)
+(* Interestingly, induction_pr can be replaced by structural induction *)
+
+
+(* Only the following core rule about loops is required *)
+(* The above proof needed more intermediate results *)
+(* probably because with the function lemma the control *)
+(* over quantifiers is tight, and no generality is lost *)
+
+(* proved using "induction_pr" after "unfold valid_triple *) 
+
+lemma core_while_rule:
+forall c:stmt, b:bexpr, inv :fmla.
+       valid_triple (Fand inv (Fembed b)) idUpd c inv ->
+       forall ainv :fmla. valid_triple inv idUpd (Swhile b ainv c) (Fand inv (Fnot (Fembed b)))
+
+
+
+(* Lemma function follows the structure of the inductive predicate *)
+(* termination requires defining an appropriate variant *)
+(* we use the previously defined function size *)
+
+let rec lemma infHu_sound_LF (c:stmt)
+    ensures { forall p q :fmla, u :upd. infHu p u c q ->  valid_triple p u c q }
+    variant { size c }
+=  match c with
+| Sskip -> ()
+| Sassign _ _ -> ()
+| Sif _ c1 c2 -> infHu_sound_LF c1 ; infHu_sound_LF c2
+| Swhile _ _ c -> infHu_sound_LF c
+| Sseq Sskip c -> infHu_sound_LF c
+| Sseq (Sassign _ _) c -> infHu_sound_LF c
+| Sseq (Sif _ c1 c2) c -> infHu_sound_LF (Sseq c1 c) ; infHu_sound_LF (Sseq c2 c)
+| Sseq (Swhile _ _ c1) c -> infHu_sound_LF c1 ; infHu_sound_LF c
+| Sseq (Sseq c1 c2) c -> infHu_sound_LF (Sseq c1 (Sseq c2 c))
+end
+
+
+end
+
+
+
+
+
+theory ReverseRules
+
+use export Semantics
+use export SystemHu
+
+
+(* Expressiveness *)
+(* Following Cooke and Clarke, we postulate the existence of weakest preconditions *)
+(* This implies that loop invariants exist, defined as the wp of the entire loop   *)
+
+predicate pre (s:state) (c:stmt) (q:fmla) =
+	  forall s' :state. big_step s c s' -> satisfies s' q
+
+
+val function wp (c:stmt) (q:fmla) : fmla
+    ensures { forall s :state. satisfies s result <-> pre s c q } 
+
+
+(* axiom expressiveness : forall c :stmt, q :fmla. *)
+(*       		  exists p :fmla. forall s :state. (satisfies s p <-> pre s c q)  *)
+
+
+
+(* The following lemmas are required to prove the reverse Hu rules below *)
+(* wp is used in the lemmas involving loops *)
+
+lemma valid_triple_skip :
+      forall p q :fmla, u :upd, s :state.
+      valid_triple p u Sskip q ->
+      satisfies s p -> big_step (applyS u s) Sskip (applyS u s) -> satisfies (applyS u s) q
+      
+(* This one does not seem to be required... *)
+(* lemma valid_triple_assign : *)
+(*       forall p q :fmla, x :ident, e :expr, u :upd, s s' :state. *)
+(*       valid_triple p u (Sassign x e) q -> *)
+(*       satisfies s p -> *)
+(*       big_step (applyS u s) (Sassign x e) (set s x (eval_expr s e)) -> *)
+(*       satisfies (set s x (eval_expr s e))  q *)
+      
+lemma valid_triple_if_true :
+      forall c1 c2 :stmt, b: bexpr, p q :fmla, u :upd, s s' :state.
+      valid_triple p u (Sif b c1 c2) q ->
+      satisfies s p ->
+      eval_bexpr (applyS u s) b ->
+      big_step (applyS u s) c1 s' ->
+      big_step (applyS u s) (Sif b c1 c2)  s' /\
+      satisfies s' q
+
+lemma valid_triple_if_false :
+      forall c1 c2 :stmt, b: bexpr, p q :fmla, u :upd, s s' :state.
+      valid_triple p u (Sif b c1 c2) q ->
+      satisfies s p ->
+      not (eval_bexpr (applyS u s) b) ->
+      big_step (applyS u s) c2 s' ->
+      big_step (applyS u s) (Sif b c1 c2)  s' /\
+      satisfies s' q
+
+lemma valid_triple_while_wp :
+      forall c :stmt, b: bexpr, p q ainv :fmla, u :upd.
+      valid_triple p u (Swhile b ainv c) q ->
+      let inv = wp (Swhile b ainv c) q in 
+      valid_fmla (Fimplies p (applyF u inv)) /\
+      (forall s s':state. satisfies s (Fand inv (Fembed b)) -> big_step s c s' -> satisfies s' inv) /\
+      valid_fmla (Fimplies (Fand inv (Fnot (Fembed b))) q)
+
+lemma valid_triple_seq :
+      forall c1 c2 :stmt, p q :fmla, u :upd, s s' s'' :state.
+      valid_triple p u (Sseq c1 c2) q ->
+      satisfies s p-> big_step (applyS u s) c1 s' -> big_step s' c2 s'' -> satisfies s'' q
+
+lemma valid_triple_if_seq_true:
+      forall c1 c2 cc :stmt, b: bexpr, p q :fmla, u :upd, s s' s'' :state.
+      valid_triple p u (Sseq (Sif b c1 c2) cc) q ->
+      satisfies s p ->
+      eval_bexpr (applyS u s) b ->
+      big_step (applyS u s) c1 s' ->
+      big_step (applyS u s) (Sif b c1 c2) s' -> (* this is not required in the lemma but allows it to be proved *)
+      big_step s' cc s'' ->
+      satisfies s'' q
+
+lemma valid_triple_if_seq_false :
+      forall c1 c2 cc :stmt, b: bexpr, p q :fmla, u :upd, s s' s'' :state.
+      valid_triple p u (Sseq (Sif b c1 c2) cc) q ->
+      satisfies s p ->
+      not (eval_bexpr (applyS u s) b) ->
+      big_step (applyS u s) c2 s' ->
+      big_step (applyS u s) (Sif b c1 c2) s' -> (* same here *)
+      big_step s' cc s'' ->
+      satisfies s'' q
+
+lemma valid_triple_while_seq :
+      forall c cc :stmt, b: bexpr, p q ainv :fmla, u :upd.
+      valid_triple p u (Sseq (Swhile b ainv c) cc) q -> 
+      let inv = wp (Swhile b ainv c) (wp cc q) in 
+      valid_fmla (Fimplies p (applyF u inv)) /\
+      (forall s s':state. satisfies s  (Fand inv (Fembed b)) -> big_step s c s' -> satisfies s' inv) /\
+      (forall s s':state. satisfies s  (Fand inv (Fnot (Fembed b))) -> big_step s cc s' -> satisfies s' q) 
+
+
+
+
+(* Reverse rules of Hu *)
+(* the loop rules state the existence of an invariant *)
+
+lemma skip_rule_rev:
+forall p q:fmla, u:upd.
+       valid_triple p u Sskip q -> valid_fmla (Fimplies p (applyF u q))
+
+lemma assign_rule_rev:
+forall p:fmla, q:fmla, x:ident, e:expr, u:upd.
+       valid_triple p u (Sassign x e) q ->
+       valid_fmla (Fimplies p (applyF (assign u x e) q))
+
+lemma if_rule_rev:
+forall p q:fmla, c1 c2 :stmt, b:bexpr, u:upd.
+       valid_triple p u (Sif b c1 c2) q -> 
+       valid_triple (Fand p (applyF u (Fembed b))) u c1 q /\ 
+       valid_triple (Fand p (applyF u (Fnot (Fembed b)))) u c2 q 
+
+lemma while_rule_rev:
+forall c:stmt, u:upd, b:bexpr, ainv p q :fmla.
+       valid_triple p u (Swhile b ainv c) q -> 
+       exists inv:fmla.
+       valid_fmla (Fimplies p (applyF u inv)) /\
+       valid_triple (Fand inv (Fembed b)) idUpd c inv /\
+       valid_fmla (Fimplies (Fand inv (Fnot (Fembed b))) q)
+
+lemma seq_skip_rule_rev:
+forall p q:fmla, u:upd, c :stmt. 
+       valid_triple p u (Sseq Sskip c) q -> valid_triple p u c q 
+
+lemma seq_assign_rule_rev:
+forall p:fmla, q:fmla, x:ident, e:expr, i:stmt, u:upd.
+       valid_triple p u (Sseq (Sassign x e) i) q ->
+       valid_triple p (assign u x e) i q 
+
+lemma seq_if_rule_rev:
+forall p q:fmla, s1 s2 s:stmt, b:bexpr, u:upd.
+       valid_triple p u (Sseq (Sif b s1 s2) s) q -> 
+       valid_triple (Fand p (applyF u (Fembed b))) u (Sseq s1 s) q /\
+       valid_triple (Fand p (applyF u (Fnot (Fembed b)))) u (Sseq s2 s) q 
+
+lemma seq_while_rule_rev:
+forall p q ainv:fmla, c cc:stmt, b:bexpr, u:upd.
+       valid_triple p u (Sseq (Swhile b ainv c) cc) q -> 
+       exists inv :fmla. 
+       valid_fmla (Fimplies p (applyF u inv)) /\
+       valid_triple (Fand inv (Fembed b)) idUpd c inv /\
+       valid_triple (Fand inv (Fnot (Fembed b))) idUpd cc q 
+
+lemma seq_seq_rule_rev:
+forall c1 c2 c:stmt, u:upd, p q:fmla.
+       valid_triple p u (Sseq (Sseq c1 c2) c) q -> 
+       valid_triple p u (Sseq c1 (Sseq c2 c)) q
+
+end
+
+
+
+
+theory HuCompleteness
+
+use Semantics
+use SystemHu
+use ReverseRules
+
+
+(* This cannot be proved with induction_ty_lex *)
+
+(* lemma infHu_complete : *)
+(* forall c[@induction] :stmt, p q :fmla, u :upd. *)
+(*        valid_triple p u c q -> infHu p u c q *)
+
+
+(* Lemma Function CAN be proved *)
+
+let rec lemma infHu_complete_LF (c:stmt) = 
+    ensures { forall p q :fmla, u :upd. valid_triple p u c q -> infHu p u c q }
+    variant { size c }
+match c with
+| Sskip -> ()
+| Sassign _ _ -> ()
+| Sif _ c1 c2 -> infHu_complete_LF c1 ; infHu_complete_LF c2
+| Swhile _ _ c -> infHu_complete_LF c
+| Sseq Sskip c -> infHu_complete_LF c
+| Sseq (Sassign _ _) c -> infHu_complete_LF c
+| Sseq (Sif _ c1 c2) c -> infHu_complete_LF (Sseq c1 c) ; infHu_complete_LF (Sseq c2 c)
+| Sseq (Swhile _ _ c1) c -> infHu_complete_LF c1 ; infHu_complete_LF c
+| Sseq (Sseq c1 c2) c -> infHu_complete_LF (Sseq c1 (Sseq c2 c))
+end
+
+
+
+end
+
+
+
+
+theory SystemHuAnnot
+
+use Semantics
+use SystemHu
+
+
+(* Inference system directed by annotated invariants *)
+
+inductive infHuA fmla upd stmt fmla =
+
+| infHuA_skip:
+  forall p q:fmla, u:upd. 
+  valid_fmla (Fimplies p (applyF u q)) ->
+  infHuA p u Sskip q
+
+| infHuA_assign:
+  forall p:fmla, q:fmla, x:ident, e:expr, u:upd.
+       valid_fmla (Fimplies p (applyF (assign u x e) q))  -> 
+       infHuA p u (Sassign x e) q
+
+| infHuA_if:
+  forall p q:fmla, c1 c2 :stmt, b:bexpr, u:upd.
+  	 infHuA (Fand p (applyF u (Fembed b))) u c1 q -> 
+  	 infHuA (Fand p (applyF u (Fnot (Fembed b)))) u c2 q -> 
+  	 infHuA p u (Sif b c1 c2) q
+
+| infHuA_while:
+  forall p q:fmla, c :stmt, b:bexpr, ainv:fmla, u:upd.
+  	 valid_fmla (Fimplies p (applyF u ainv)) -> 
+         infHuA (Fand ainv (Fembed b)) idUpd c ainv -> 
+  	 valid_fmla (Fimplies (Fand ainv (Fnot (Fembed b))) q) -> 
+  	 infHuA p u (Swhile b ainv c) q
+
+| infHuA_skipseq:
+  forall p q:fmla, u:upd, c :stmt. 
+  infHuA p u c q ->
+  infHuA p u (Sseq Sskip c) q
+
+| infHuA_assignseq:
+forall p:fmla, q:fmla, x:ident, e:expr, c:stmt, u:upd.
+       infHuA p (assign u x e) c q -> 
+       infHuA p u (Sseq (Sassign x e) c) q
+
+| infHuA_ifseq:
+  forall p q:fmla, c1 c2 c:stmt, b:bexpr, u:upd.
+  	 infHuA (Fand p (applyF u (Fembed b))) u (Sseq c1 c) q -> 
+  	 infHuA (Fand p (applyF u (Fnot (Fembed b)))) u (Sseq c2 c) q -> 
+  	 infHuA p u (Sseq (Sif b c1 c2) c) q
+
+| infHuA_whileseq:
+  forall p q:fmla, c cc:stmt, b:bexpr, ainv:fmla, u:upd.
+  	 valid_fmla (Fimplies p (applyF u ainv)) -> 
+         infHuA (Fand ainv (Fembed b)) idUpd c ainv -> 
+  	 infHuA (Fand ainv (Fnot (Fembed b))) idUpd cc q -> 
+  	 infHuA p u (Sseq (Swhile b ainv c) cc) q
+
+| infHuA_seqseq:
+  forall p q:fmla, c1 c2 c:stmt, u:upd.
+  	 infHuA p u (Sseq c1 (Sseq c2 c)) q ->
+  	 infHuA p u (Sseq (Sseq c1 c2) c) q
+
+
+
+(* This system is of course sound *)
+(* induction_pr *)
+
+lemma infHuA_sound : forall p q :fmla, u :upd, c :stmt.
+      infHuA p u c q -> infHu p u c q
+
+
+
+(* program is well-annotated w.r.t. p, u, q *)
+(* if triple can be derived freely, it can be derived *)
+(* directed by annotated invariants *)
+
+predicate ok (p:fmla) (u:upd) (c:stmt) (q:fmla) =
+	  infHu p u c q -> infHuA p u c q
+
+
+end
+
+
+
+
+
+
+
+
+
+theory VCGen
+
+use Semantics
+use SystemHu
+use SystemHuAnnot
+use HuSoundness_LF
+use HuCompleteness
+use export set.Fset
+
+predicate valid_fmlas (g: set fmla) = forall p :fmla. mem p g  -> valid_fmla p
+
+
+
+(* One could write a VCGen for programs without annotations, *)
+(* using the wp function declared above *)
+(* but it could not be executed or extracted, of course *)
+
+
+(* The VCGen below cannot be written as a logic function, because *)
+(* termination is not established automatically *)
+(* thus a variant must be used. *)
+(* This is the only reason why it is a program function, *)
+(* since it is not meant, in this version, to be executed. *)
+(* But it must be ghost, since it modifies updates through *)
+(* the assign function, which uses the ghost function Map.set *)
+
+
+
+let rec ghost function vcgen_l (p:fmla) (u:upd) (c:stmt) (q:fmla) : set fmla =
+    ensures { valid_fmlas result -> infHuA p u c q }
+    (* ensures { valid_fmlas result -> infHu p u c q } *)
+    (* ensures { valid_fmlas result -> valid_triple p u c q } *)
+    ensures { infHuA p u c q -> valid_fmlas result }
+    variant { size c }
+match c with
+      | Sskip -> singleton (Fimplies p (applyF u q))
+      | Sassign x e -> singleton (Fimplies p (applyF (assign u x e) q))
+      | Sif b c1 c2 -> union (vcgen_l (Fand p (applyF u (Fembed b))) u c1 q) 
+      	      	       	    (vcgen_l (Fand p (applyF u (Fnot (Fembed b)))) u c2 q)
+      | Swhile b ainv cb -> add (Fimplies p (applyF u ainv))
+      	  	    	         (add (Fimplies (Fand ainv (Fnot (Fembed b))) q)
+				      (vcgen_l (Fand ainv (Fembed b)) idUpd cb ainv))
+      | Sseq (Sskip) cc -> vcgen_l p u cc q
+      | Sseq (Sassign x e) cc -> vcgen_l p (assign u x e) cc q
+      | Sseq (Sif b c1 c2) cc -> union (vcgen_l (Fand p (applyF u (Fembed b))) u (Sseq c1 cc) q) 
+      	      	     	       	        (vcgen_l (Fand p (applyF u (Fnot (Fembed b)))) u (Sseq c2 cc) q)
+      | Sseq (Swhile b ainv cb) cc -> add (Fimplies p (applyF u ainv))
+      	  	    	       	    	  (union (vcgen_l (Fand ainv (Fembed b)) idUpd cb ainv)
+      			     	       	         (vcgen_l (Fand ainv (Fnot (Fembed b))) idUpd cc q))
+      |	Sseq (Sseq c1 c2) cc -> vcgen_l p u (Sseq c1 (Sseq c2 cc)) q
+end				   
+
+
+
+lemma vcgen_sound : forall p q :fmla, u :upd, c :stmt.
+      valid_fmlas (vcgen_l p u c q) -> valid_triple p u c q
+
+lemma vcgen_cmplt : forall p q :fmla, u :upd, c :stmt.
+     (valid_triple p u c q) /\ (ok p u c q) -> valid_fmlas (vcgen_l p u c q)
+
+
+
+
+end
+
+
+
+
+
+module VCGenExtr
+
+use Semantics
+use SystemHu
+use SystemHuAnnot
+use VCGen
+
+use option.Option
+
+
+(* We will now use Impmaps to implement abstract maps *)
+(* The .contents field is abstract and thus can be accessed *)
+(* in logic / annotations / ghost code *)
+(* But not in programs: they must access impmaps through the API [vals] *)
+
+clone impmap.Impmap with type key = ident
+type impupd = Impmap.t expr
+
+
+
+(* function to convert impupdates to abstract updates *)
+(* pure; will only be used in annotations *)
+
+function impupd2upd (iu :impupd) : upd =
+	 fun (x: ident) -> match iu.contents[x] with
+	     	 	   	 | None -> Evar x
+	       	  	   	 | Some e -> e
+				 end
+
+
+
+let function idImpUpd () : impupd =
+    ensures { impupd2upd result = idUpd }
+empty()
+
+
+(* The API in the library does not contain a copy function *)
+(* nor a function returning the domain of an impmap. *)
+(* We need such a function, so we must write its contract, *)
+(* but we cannot implement it since we have no access to the domain *)
+
+val copy (u :impupd) : impupd 
+    ensures { u = old u }
+    ensures { result <> u /\ impupd2upd result = impupd2upd u } 
+
+
+
+
+
+(* The following functions lift to impupd functions *)
+(* already defined for upd, with adequate contracts *)
+(* that are proved trivially *)
+
+let rec impapplyE (iu : impupd) (e: expr) : expr =
+    ensures { result = applyE (impupd2upd iu) e }
+    variant { e }
+match e with
+      | Econst n -> Econst n
+      | Evar x -> if mem x iu then get x iu
+	     	  else Evar x
+      | Ebin e1 op e2 -> Ebin (impapplyE iu e1) op (impapplyE iu e2)
+end
+
+
+
+(* this program function adds a pair (x,e) to an imp. update *)
+
+let impassign (iu: impupd) (x: ident) (e: expr) =
+    ensures { impupd2upd iu = assign (impupd2upd (old iu)) x e }
+add x (impapplyE iu e) iu
+
+
+let rec impapplyB (iu: impupd) (b: bexpr) : bexpr =
+    ensures { result = applyB (impupd2upd iu) b }
+    variant { b }
+match b with
+      | Bcomp e1 bop e2 -> Bcomp (impapplyE iu e1) bop (impapplyE iu e2) 
+      | Btrue -> Btrue
+      | Bfalse -> Bfalse
+      | Band b1 b2 -> Band (impapplyB iu b1) (impapplyB iu b2) 
+      | Bor b1 b2 -> Bor (impapplyB iu b1) (impapplyB iu b2) 
+      | Bnot b1 -> Bnot (impapplyB iu b1) 
+end
+
+
+let rec impapplyF (iu: impupd) (p: fmla) : fmla =
+    ensures { result = applyF (impupd2upd iu) p }
+    variant { p }
+match p with
+      | Fcomp e1 bop e2 -> Fcomp (impapplyE iu e1) bop (impapplyE iu e2) 
+      | Fembed b ->  Fembed (impapplyB iu b)
+      | Ftrue -> Ftrue
+      | Ffalse -> Ffalse
+      | Fand p1 p2 ->  Fand (impapplyF iu p1) (impapplyF iu p2) 
+      | For p1 p2 ->  For (impapplyF iu p1) (impapplyF iu p2) 
+      | Fnot p1 -> Fnot (impapplyF iu p1) 
+      | Fimplies p1 p2 -> Fimplies (impapplyF iu p1) (impapplyF iu p2) 
+end
+
+
+
+(* An implementation type for sets must also be used *)
+
+clone impset.Impset with type elt = fmla
+type vcSet = Impset.t 
+
+
+(* function to convert impsets to abstract sets *)
+(* unlike impmaps, it suffices to return the abstract contents *)
+
+function impset2set (vcs :vcSet) : set fmla = vcs.contents
+
+
+(* Function to add elements of a set to another *)
+
+val addSet (s':vcSet) (s:vcSet): unit
+    writes  { s }	
+    ensures { s.contents = union (impset2set s') (impset2set (old s)) }
+
+
+
+
+
+(* vcgen_l serves as reference for the executable one below *)
+(* Note the use of copies of imp. updates when handling branching *)
+
+let rec vcgen (p:fmla) (iu:impupd) (c:stmt) (q:fmla) : vcSet =
+    ensures { impset2set result == vcgen_l p (impupd2upd (old iu)) c q }
+    variant { size c }
+let vcs = empty() in    
+match c with 
+      | Sskip -> add (Fimplies p (impapplyF iu q)) vcs;
+      	      	 vcs
+      | Sassign x e -> impassign iu x e;
+      		       add (Fimplies p (impapplyF iu q)) vcs;
+      	      	       vcs
+      | Sif b c1 c2 -> let iu1 = copy iu in
+		       addSet (vcgen (Fand p (impapplyF iu (Fembed b))) iu c1 q) vcs; 
+      	      	       addSet (vcgen (Fand p (impapplyF iu1 (Fnot (Fembed b)))) iu1 c2 q) vcs;
+      	      	       vcs
+      | Swhile b ainv cb -> add (Fimplies p (impapplyF iu ainv)) vcs;
+			    addSet (vcgen (Fand ainv (Fembed b)) (idImpUpd()) cb ainv) vcs;
+      	  	    	    add (Fimplies (Fand ainv (Fnot (Fembed b))) q) vcs;
+      	      	 	    vcs
+      | Sseq (Sskip) cc -> addSet (vcgen p iu cc q) vcs;
+      	      	     	   vcs
+      | Sseq (Sassign x e) cc -> impassign iu x e;
+      	      	       	         addSet (vcgen p iu cc q) vcs;
+      	      			 vcs
+      | Sseq (Sif b c1 c2) cc -> let iu1 = copy iu in
+				 addSet (vcgen  (Fand p (impapplyF iu (Fembed b))) iu (Sseq c1 cc) q) vcs;
+      	      	     	       	 addSet (vcgen (Fand p (impapplyF iu1 (Fnot (Fembed b)))) iu1 (Sseq c2 cc) q) vcs;
+      	      			 vcs
+      | Sseq (Swhile b ainv cb) cc -> add (Fimplies p (impapplyF iu ainv)) vcs;
+      	  	    	       	      addSet (vcgen (Fand ainv (Fembed b)) (idImpUpd()) cb ainv) vcs;
+      			     	      addSet (vcgen (Fand ainv (Fnot (Fembed b))) (idImpUpd()) cc q) vcs;
+      	      			      vcs
+      |	Sseq (Sseq c1 c2) cc -> addSet (vcgen p iu (Sseq c1 (Sseq c2 cc)) q) vcs;
+      	      	      	     	vcs
+end				   
+
+
+
+
+
+
+(* Alternative VCGen function for implementation *)
+(* This dispenses with vcgen_l entirely, since it includes ghost code *)
+(* to keep track of the correspondence with functional updates and sets *)
+
+let rec vcgen_g (p:fmla) (iu:impupd) (ghost u:upd) (c:stmt) (q:fmla) : (vc :vcSet, ghost gvc :set fmla) = 
+    requires { u = impupd2upd iu }
+    ensures { infHuA p u c q <-> valid_fmlas gvc }
+    ensures { impset2set vc == gvc  }
+    variant { size c }
+let vcs = empty() in    
+match c with 
+      | Sskip -> add (Fimplies p (impapplyF iu q)) vcs;
+      	      	 vcs, singleton (Fimplies p (applyF u q))
+      | Sassign x e -> impassign iu x e;
+      		       add (Fimplies p (impapplyF iu q)) vcs;
+      	      	       vcs, singleton (Fimplies p (applyF (assign u x e) q))
+      | Sif b c1 c2 -> let iu1 = copy iu in
+                       let vc1, gvc1 = vcgen_g (Fand p (impapplyF iu (Fembed b))) iu u c1 q in
+		       let vc2, gvc2 = vcgen_g (Fand p (impapplyF iu1 (Fnot (Fembed b)))) iu1 u c2 q in
+		       addSet vc1 vcs; 
+      	      	       addSet vc2 vcs;
+      	      	       vcs, union gvc1 gvc2
+      | Swhile b ainv cb -> let vc, gvc = vcgen_g (Fand ainv (Fembed b)) (idImpUpd()) idUpd cb ainv in
+                            add (Fimplies p (impapplyF iu ainv)) vcs;
+      			    addSet vc vcs;
+      	  	    	    add (Fimplies (Fand ainv (Fnot (Fembed b))) q) vcs;
+      	      	 	    vcs, (Fset.add (Fimplies p (applyF u ainv))
+      	  	    	                   (Fset.add (Fimplies (Fand ainv (Fnot (Fembed b))) q) gvc))
+      | Sseq (Sskip) cc -> let vc, gvc = vcgen_g p iu u cc q in
+      	     	     	   addSet vc vcs; 
+      	     	     	   vcs, gvc
+      | Sseq (Sassign x e) cc -> impassign iu x e;
+      	      	       	         let vc, gvc = vcgen_g p iu (assign u x e) cc q in
+      	      	       	         addSet vc vcs;
+      	      			 vcs, gvc
+      | Sseq (Sif b c1 c2) cc -> let iu1 = copy iu in
+                                 let vc1, gvc1 = vcgen_g (Fand p (impapplyF iu (Fembed b))) iu u (Sseq c1 cc) q in
+      		                 let vc2, gvc2 = vcgen_g (Fand p (impapplyF iu1 (Fnot (Fembed b)))) iu1 u (Sseq c2 cc) q in
+				 addSet vc1 vcs;
+      	      	     	       	 addSet vc2 vcs;
+      	      			 vcs, union gvc1 gvc2
+      | Sseq (Swhile b ainv cb) cc -> let vc, gvc = vcgen_g (Fand ainv (Fembed b)) (idImpUpd()) idUpd cb ainv in
+                            	      let vcc, gvcc = vcgen_g (Fand ainv (Fnot (Fembed b))) (idImpUpd()) idUpd cc q in
+				      add (Fimplies p (impapplyF iu ainv)) vcs;
+      	  	    	       	      addSet vc vcs;
+				      addSet vcc vcs;
+      			              vcs, Fset.add (Fimplies p (applyF u ainv)) (union gvc gvcc)
+      |	Sseq (Sseq c1 c2) cc -> let vc, gvc = vcgen_g p iu u (Sseq c1 (Sseq c2 cc)) q in
+      	     	     	        addSet vc vcs; 
+      	     	     	        vcs, gvc 
+end				   
+
+
+
+
+(* main VCGen function, initializes updates as empty *)
+
+let vcgen_main (p:fmla) (c:stmt) (q:fmla) =
+    ensures { valid_fmlas (impset2set result) -> valid_triple p idUpd c q }
+    ensures { valid_triple p idUpd c q /\ ok p idUpd c q -> valid_fmlas (impset2set result) }
+let (vc, _) =  vcgen_g (p:fmla) (idImpUpd()) idUpd (c:stmt) (q:fmla)
+in vc
+
+
+
+
+let test_vcg () =
+    let x = MkIdent 0 in
+    let y = MkIdent 1 in
+    let t = MkIdent 2 in
+    let a = MkIdent 3 in
+    let b = MkIdent 4 in
+    let swap = Sseq (Sseq (Sassign t (Evar x))
+     	      	     	    (Sassign x (Evar y)))
+		     (Sassign y (Evar t)) in
+    let p = Fand (Fcomp (Evar x) BOeq (Evar a)) (Fcomp (Evar y) BOeq (Evar b)) in
+    let q = Fand (Fcomp (Evar y) BOeq (Evar a)) (Fcomp (Evar x) BOeq (Evar b)) in
+    vcgen_main p swap q
+
+
+
+end 
+
+
+
+

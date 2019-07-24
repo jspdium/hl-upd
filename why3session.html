@@ -1,0 +1,364 @@
+<h1>Why3 Proof Results for Project "hl-upd"</h1>
+<h2><span style="color:#008000">Theory "hl-upd.ImpLanguage": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="4">Obligations</td><td text-rotation="90">Alt-Ergo 2.2.0</td><td text-rotation="90">Z3 4.7.1</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">deduction</td><td style="background-color:#C0FFC0">0.02</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">VC for size_posLF</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">VC for sizeC</td><td style="background-color:#C0FFC0">0.02</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">deterministic_execution</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">induction_ty_lex</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="15" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="3">deterministic_execution.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="13" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">deterministic_execution.0.0</td><td style="background-color:#C0FFC0">0.13</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">deterministic_execution.0.1</td><td style="background-color:#C0FFC0">0.11</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">deterministic_execution.0.2</td><td style="background-color:#C0FFC0">0.17</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">deterministic_execution.0.3</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">induction_pr</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="7" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">deterministic_execution.0.3.0</td><td style="background-color:#C0FFC0">0.02</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">deterministic_execution.0.3.1</td><td style="background-color:#C0FFC0">0.02</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">deterministic_execution.0.3.2</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">deterministic_execution.0.3.3</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">deterministic_execution.0.3.4</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">deterministic_execution.0.3.5</td><td style="background-color:#C0FFC0">0.29</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">deterministic_execution.0.3.6</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">deterministic_execution.0.4</td><td style="background-color:#C0FFC0">0.29</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">AssignSeq</td><td style="background-color:#C0FFC0">0.07</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">IfSeqTrue</td><td style="background-color:#C0FFC0">0.23</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">IfSeqFalse</td><td style="background-color:#C0FFC0">0.28</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">SeqSeq</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="2" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="3">SeqSeq.0</td><td style="background-color:#C0FFC0">0.28</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">SeqSeq.1</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.03</td></tr>
+</table>
+
+<h2><span style="color:#008000">Theory "hl-upd.Updates": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="1">Obligations</td><td text-rotation="90">Alt-Ergo 2.2.0</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">applySId</td><td style="background-color:#C0FFC0">0.03</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">VC for applyE</td><td style="background-color:#C0FFC0">0.04</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">VC for applyEIdLF</td><td style="background-color:#C0FFC0">0.02</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">VC for applyB</td><td style="background-color:#C0FFC0">0.17</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">VC for applyBIdLF</td><td style="background-color:#C0FFC0">0.04</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">VC for applyF</td><td style="background-color:#C0FFC0">0.32</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">VC for applyFIdLF</td><td style="background-color:#C0FFC0">0.03</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">applySAssign</td><td style="background-color:#C0FFC0">0.03</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">AssignTest1</td><td style="background-color:#C0FFC0">0.03</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">AssignTest2</td><td style="background-color:#C0FFC0">0.03</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">AssignTestSwap</td><td style="background-color:#C0FFC0">0.03</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">AssignTestSwap2</td><td style="background-color:#C0FFC0">0.03</td></tr>
+</table>
+
+<h2><span style="color:#008000">Theory "hl-upd.Semantics": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="2">Obligations</td><td text-rotation="90">Alt-Ergo 2.2.0</td><td text-rotation="90">Z3 4.7.1</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">TestValidTripleSimpleProg1</td><td style="background-color:#C0FFC0">0.70</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">TestValidTripleSimpleProg2</td><td style="background-color:#C0FFC0">0.69</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">TestValidTripleSwapProg</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.55</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">TestValidTripleAltSwapProg</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="1" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">TestValidTripleAltSwapProg.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.20</td></tr>
+</table>
+
+<h2><span style="color:#008000">Theory "hl-upd.SystemHu": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="1">Obligations</td><td text-rotation="90">Alt-Ergo 2.2.0</td><td text-rotation="90">CVC4 1.4</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">TestInfSimpleProg1</td><td style="background-color:#C0FFC0">0.41</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">TestInfSimpleProg2</td><td style="background-color:#C0FFC0">0.40</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">TestInfSwapProg</td><td style="background-color:#C0FFC0">0.32</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">TestInfAltSwapProg</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.11</td></tr>
+</table>
+
+<h2><span style="color:#008000">Theory "hl-upd.HuSoundness": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="3">Obligations</td><td text-rotation="90">Alt-Ergo 2.2.0</td><td text-rotation="90">CVC4 1.4</td><td text-rotation="90">Z3 4.7.1</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">core_while_rule</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">unfold valid_triple</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="9" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">core_while_rule.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">induction_pr</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="7" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.0</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.1</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.2</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.3</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.4</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.5</td><td style="background-color:#C0FFC0">0.47</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.6</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">while_rule</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="1" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">while_rule.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">20.93</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">seq_while_rule</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.16</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">infHu_sound</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">induction_pr</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="13" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">infHu_sound.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.04</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">infHu_sound.1</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.05</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">infHu_sound.2</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="1" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">infHu_sound.2.0</td><td style="background-color:#C0FFC0">2.74</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">infHu_sound.3</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">infHu_sound.4</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.53</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">infHu_sound.5</td><td style="background-color:#C0FFC0">0.12</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">infHu_sound.6</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="1" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">infHu_sound.6.0</td><td style="background-color:#C0FFC0">1.21</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">infHu_sound.7</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">infHu_sound.8</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+</table>
+
+<h2><span style="color:#008000">Theory "hl-upd.HuSoundness_LF": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="3">Obligations</td><td text-rotation="90">Alt-Ergo 2.2.0</td><td text-rotation="90">Z3 4.7.1</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">core_while_rule</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">unfold valid_triple</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="9" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">core_while_rule.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">induction_pr</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="7" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.0</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.1</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.2</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.3</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.4</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.5</td><td style="background-color:#C0FFC0">0.51</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">core_while_rule.0.6</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">VC for infHu_sound_LF</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="19" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.05</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.07</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.14</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.36</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.13</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.10</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">1.16</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">1.26</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.23</td></tr>
+</table>
+
+<h2><span style="color:#008000">Theory "hl-upd.ReverseRules": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="4">Obligations</td><td text-rotation="90">Alt-Ergo 2.2.0</td><td text-rotation="90">CVC4 1.4</td><td text-rotation="90">Z3 4.7.1</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">valid_triple_skip</td><td style="background-color:#C0FFC0">0.02</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">valid_triple_if_true</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">valid_triple_if_false</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">valid_triple_while_wp</td><td style="background-color:#C0FFC0">0.31</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">valid_triple_seq</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.10</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">valid_triple_if_seq_true</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">valid_triple_if_seq_false</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">valid_triple_while_seq</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.05</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">skip_rule_rev</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">assign_rule_rev</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">if_rule_rev</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="2" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="3">if_rule_rev.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.18</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">if_rule_rev.1</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">while_rule_rev</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="1" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="3">while_rule_rev.0</td><td style="background-color:#C0FFC0">0.07</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">seq_skip_rule_rev</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="3" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="3">seq_skip_rule_rev.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">introduce_premises</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="1" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">seq_skip_rule_rev.0.0</td><td style="background-color:#C0FFC0">49.66</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">seq_assign_rule_rev</td><td style="background-color:#C0FFC0">0.07</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">seq_if_rule_rev</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="2" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="3">seq_if_rule_rev.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.52</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">seq_if_rule_rev.1</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.27</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">seq_while_rule_rev</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="5" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="3">seq_while_rule_rev.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">introduce_premises</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="3" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">seq_while_rule_rev.0.0</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">inline_goal</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="1" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">seq_while_rule_rev.0.0.0</td><td style="background-color:#C0FFC0">0.30</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">seq_seq_rule_rev</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+</table>
+
+<h2><span style="color:#008000">Theory "hl-upd.HuCompleteness": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="1">Obligations</td><td text-rotation="90">Z3 4.7.1</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">VC for infHu_complete_LF</td><td style="background-color:#C0FFC0">0.07</td></tr>
+</table>
+
+<h2><span style="color:#008000">Theory "hl-upd.SystemHuAnnot": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="2">Obligations</td><td text-rotation="90">Alt-Ergo 2.2.0</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">infHuA_sound</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">induction_pr</td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="9" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">infHuA_sound.0</td><td style="background-color:#C0FFC0">0.04</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">infHuA_sound.1</td><td style="background-color:#C0FFC0">0.04</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">infHuA_sound.2</td><td style="background-color:#C0FFC0">0.05</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">infHuA_sound.3</td><td style="background-color:#C0FFC0">0.04</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">infHuA_sound.4</td><td style="background-color:#C0FFC0">0.03</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">infHuA_sound.5</td><td style="background-color:#C0FFC0">0.03</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">infHuA_sound.6</td><td style="background-color:#C0FFC0">0.04</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">infHuA_sound.7</td><td style="background-color:#C0FFC0">0.04</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">infHuA_sound.8</td><td style="background-color:#C0FFC0">0.04</td></tr>
+</table>
+
+<h2><span style="color:#008000">Theory "hl-upd.VCGen": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="3">Obligations</td><td text-rotation="90">Alt-Ergo 2.2.0</td><td text-rotation="90">CVC4 1.4</td><td text-rotation="90">Z3 4.7.1</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">VC for vcgen_l</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="70" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.07</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.08</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.07</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">variant decrease</td><td style="background-color:#C0FFC0">0.07</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.12</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.08</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.07</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.09</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.10</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.11</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.13</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="32" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.28</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.28</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#C0FFC0">0.11</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.48</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.39</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#C0FFC0">0.24</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#C0FFC0">0.13</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#C0FFC0">0.12</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.40</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.39</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#C0FFC0">0.22</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.08</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.09</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.11</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="8" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.36</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.38</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.56</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.47</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.42</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.30</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.47</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.11</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.81</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.35</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">vcgen_sound</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">vcgen_cmplt</td><td style="background-color:#C0FFC0">0.03</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+</table>
+
+<h2><span style="color:#008000">Theory "hl-upd.VCGenExtr": fully verified</span></h2>
+<table border="1" style="border-collapse:collapse"><tr><td colspan="4">Obligations</td><td text-rotation="90">Alt-Ergo 2.2.0</td><td text-rotation="90">CVC4 1.4</td><td text-rotation="90">Z3 4.7.1</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">VC for idImpUpd</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.06</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">VC for impapplyE</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="7" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.07</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.18</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">VC for impassign</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.06</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">VC for impapplyB</td><td style="background-color:#C0FFC0">0.11</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">VC for impapplyF</td><td style="background-color:#C0FFC0">0.16</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">VC for vcgen</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="23" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.16</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.14</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.44</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.07</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">3.12</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.11</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.14</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.35</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">1.15</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">introduce_premises</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="3" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">inline_goal</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="1" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="1">postcondition</td><td style="background-color:#C0FFC0">0.13</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">VC for vcgen_g</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="47" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.08</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.12</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.58</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.18</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.41</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.22</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.07</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.91</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">1.37</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.26</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.10</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.30</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.11</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.08</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">1.08</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.20</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.05</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">1.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">split_all_full</td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td><td style="background-color:#E0E0E0"></td></tr>
+<tr><td rowspan="8" style="width:1ex"></td><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.42</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">2.38</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.16</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.97</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.16</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">1.74</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#C0FFC0">0.14</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="2">postcondition</td><td style="background-color:#C0FFC0">0.32</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">variant decrease</td><td style="background-color:#C0FFC0">0.08</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">precondition</td><td style="background-color:#C0FFC0">0.06</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.34</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="3">postcondition</td><td style="background-color:#C0FFC0">0.15</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+<tr><td style="background-color:#C0FFC0" colspan="4">VC for vcgen_main</td><td style="background-color:#C0FFC0">0.04</td><td style="background-color:#E0E0E0">---</td><td style="background-color:#E0E0E0">---</td></tr>
+</table>

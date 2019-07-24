@@ -1,0 +1,1204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" href="style.css" type="text/css">
+<title>hl-upd.html</title>
+</head>
+<body>
+<div class="why3doc">
+<pre><span class="comment">(* Propositional Hoare logic with updates *)</span>
+
+<span class="keyword1">theory</span> <a name="ImpLanguage_">ImpLanguage</a>
+
+<span class="keyword1">use</span> <span class="keyword1">export</span> map.<a href="map.html#Map_">Map</a>
+<span class="keyword1">use</span> <span class="keyword1">export</span> int.<a href="int.html#Int_">Int</a>
+
+<span class="comment">(* identifiers *)</span>
+
+<span class="keyword1">type</span> <a name="ident_15">ident</a> =
+   | <a name="MkIdent_16">MkIdent</a> int
+
+<span class="comment">(* expressions *)</span>
+
+<span class="keyword1">type</span> <a name="operator_22">operator</a> = <a name="Oplus_22">Oplus</a> | <a name="Ominus_22">Ominus</a> | <a name="Omult_22">Omult</a>
+
+<span class="keyword1">type</span> <a name="expr_24">expr</a> =
+  | <a name="Econst_25">Econst</a> int
+  | <a name="Evar_26">Evar</a> <a href="#ident_15">ident</a>
+  | <a name="Ebin_27">Ebin</a> expr <a href="#operator_22">operator</a> expr
+
+<span class="comment">(* Boolean expressions *)</span>
+
+<span class="keyword1">type</span> <a name="boperator_32">boperator</a> = <a name="BOeq_32">BOeq</a> | <a name="BOlt_32">BOlt</a> | <a name="BOlteq_32">BOlteq</a> | <a name="BOgt_32">BOgt</a> | <a name="BOgteq_32">BOgteq</a>
+
+<span class="keyword1">type</span> <a name="bexpr_34">bexpr</a> =
+     | <a name="Bcomp_35">Bcomp</a> <a href="#expr_24">expr</a> <a href="#boperator_32">boperator</a> <a href="#expr_24">expr</a>
+     | <a name="Btrue_36">Btrue</a>
+     | <a name="Bfalse_37">Bfalse</a>
+     | <a name="Band_38">Band</a> bexpr bexpr
+     | <a name="Bor_39">Bor</a> bexpr bexpr
+     | <a name="Bnot_40">Bnot</a> bexpr
+
+<span class="comment">(* program states *)</span>
+
+<span class="keyword1">type</span> <a name="state_45">state</a> = <a href="map.html#map_9">map</a> <a href="#ident_15">ident</a> int
+
+<span class="comment">(* evaluation of expressions *)</span>
+
+<span class="keyword1">function</span> <a name="eval_bin_49">eval_bin</a> (x:int) (op:<a href="#operator_22">operator</a>) (y:int) : int =
+<span class="keyword1">match</span> op <span class="keyword1">with</span>
+      | <a href="#Oplus_22">Oplus</a> -&gt; x<a href="int.html#infix%20+_19">+</a>y
+      | <a href="#Ominus_22">Ominus</a> -&gt; x<a href="int.html#infix%20-_23">-</a>y
+      | <a href="#Omult_22">Omult</a> -&gt; x<a href="int.html#infix%20*_20">*</a>y
+<span class="keyword1">end</span>
+
+<span class="keyword1">function</span> <a name="eval_expr_56">eval_expr</a> (s:<a href="#state_45">state</a>) (e:<a href="#expr_24">expr</a>) : int =
+<span class="keyword1">match</span> e <span class="keyword1">with</span>
+      | <a href="#Econst_25">Econst</a> n -&gt; n
+      | <a href="#Evar_26">Evar</a> x -&gt; <a href="map.html#get_11">get</a> s x
+      | <a href="#Ebin_27">Ebin</a> e1 op e2 -&gt;
+      	<a href="#eval_bin_49">eval_bin</a> (<a href="#eval_expr_56">eval_expr</a> s e1) op (<a href="#eval_expr_56">eval_expr</a> s e2)
+<span class="keyword1">end</span>
+
+<span class="keyword1">predicate</span> <a name="eval_bop_64">eval_bop</a> (x:int) (bop:<a href="#boperator_32">boperator</a>) (y:int) =
+<span class="keyword1">match</span> bop <span class="keyword1">with</span>
+      | <a href="#BOeq_32">BOeq</a> -&gt; x = y
+      | <a href="#BOlt_32">BOlt</a> -&gt; x <a href="int.html#infix%20%3C_21">&lt;</a> y
+      | <a href="#BOlteq_32">BOlteq</a> -&gt; x <a href="int.html#infix%20%3C=_25">&lt;=</a> y
+      | <a href="#BOgt_32">BOgt</a> -&gt; x <a href="int.html#infix%20%3E_24">&gt;</a> y
+      | <a href="#BOgteq_32">BOgteq</a> -&gt; x <a href="int.html#infix%20%3E=_26">&gt;=</a> y
+<span class="keyword1">end</span>
+
+<span class="comment">(* Boolean expressions *)</span>
+<span class="comment">(* could be intepreted as Why3 bool instead *)</span>
+
+<span class="keyword1">predicate</span> <a name="eval_bexpr_77">eval_bexpr</a> (s:<a href="#state_45">state</a>) (b:<a href="#bexpr_34">bexpr</a>) =
+<span class="keyword1">match</span> b <span class="keyword1">with</span>
+      | <a href="#Bcomp_35">Bcomp</a> e1 bop e2 -&gt; <a href="#eval_bop_64">eval_bop</a>  (<a href="#eval_expr_56">eval_expr</a> s e1) bop (<a href="#eval_expr_56">eval_expr</a> s e2)
+      | <a href="#Btrue_36">Btrue</a> -&gt; <span class="keyword1">true</span>
+      | <a href="#Bfalse_37">Bfalse</a> -&gt; <span class="keyword1">false</span>
+      | <a href="#Band_38">Band</a> b1 b2 -&gt; (<a href="#eval_bexpr_77">eval_bexpr</a> s b1) /\ (<a href="#eval_bexpr_77">eval_bexpr</a> s b2)
+      | <a href="#Bor_39">Bor</a> b1 b2 -&gt;  (<a href="#eval_bexpr_77">eval_bexpr</a> s b1) \/ (<a href="#eval_bexpr_77">eval_bexpr</a> s b2)
+      | <a href="#Bnot_40">Bnot</a> b1 -&gt; <span class="keyword1">not</span> (<a href="#eval_bexpr_77">eval_bexpr</a> s b1)
+<span class="keyword1">end</span>
+
+<span class="comment">(* formulas - extension of bexpr *)</span>
+<span class="comment">(* no quantifiers for now *)</span>
+
+<span class="keyword1">type</span> <a name="fmla_94">fmla</a> =
+     | <a name="Fcomp_95">Fcomp</a> <a href="#expr_24">expr</a> <a href="#boperator_32">boperator</a> <a href="#expr_24">expr</a>
+     | <a name="Fembed_96">Fembed</a> <a href="#bexpr_34">bexpr</a>
+     | <a name="Ftrue_97">Ftrue</a>
+     | <a name="Ffalse_98">Ffalse</a>
+     | <a name="Fand_99">Fand</a> fmla fmla
+     | <a name="For_100">For</a> fmla fmla
+     | <a name="Fnot_101">Fnot</a> fmla
+     | <a name="Fimplies_102">Fimplies</a> fmla fmla
+
+<span class="comment">(* semantics of formulas *)</span>
+
+<span class="keyword1">predicate</span> <a name="satisfies_107">satisfies</a> (s:<a href="#state_45">state</a>) (p:<a href="#fmla_94">fmla</a>) =
+<span class="keyword1">match</span> p <span class="keyword1">with</span>
+      | <a href="#Fcomp_95">Fcomp</a> e1 bop e2 -&gt; <a href="#eval_bop_64">eval_bop</a>  (<a href="#eval_expr_56">eval_expr</a> s e1) bop (<a href="#eval_expr_56">eval_expr</a> s e2)
+      | <a href="#Fembed_96">Fembed</a> b -&gt;  (<a href="#eval_bexpr_77">eval_bexpr</a> s b)
+      | <a href="#Ftrue_97">Ftrue</a> -&gt; <span class="keyword1">true</span>
+      | <a href="#Ffalse_98">Ffalse</a> -&gt; <span class="keyword1">false</span>
+      | <a href="#Fand_99">Fand</a> p1 p2 -&gt; (<a href="#satisfies_107">satisfies</a> s p1) /\ (<a href="#satisfies_107">satisfies</a> s p2)
+      | <a href="#For_100">For</a> p1 p2 -&gt; (<a href="#satisfies_107">satisfies</a> s p1) \/ (<a href="#satisfies_107">satisfies</a> s p2)
+      | <a href="#Fnot_101">Fnot</a> p1 -&gt; <span class="keyword1">not</span> (<a href="#satisfies_107">satisfies</a> s p1)
+      | <a href="#Fimplies_102">Fimplies</a> p1 p2 -&gt; (<span class="keyword1">not</span> (<a href="#satisfies_107">satisfies</a> s p1)) \/ (<a href="#satisfies_107">satisfies</a> s p2)
+<span class="keyword1">end</span>
+
+<span class="keyword1">predicate</span> <a name="valid_fmla_119">valid_fmla</a> (p:<a href="#fmla_94">fmla</a>) = <span class="keyword1">forall</span> s:<a href="#state_45">state</a>. <a href="#satisfies_107">satisfies</a> s p
+
+<span class="comment">(* required by one of the VCs for completeness *)</span>
+
+<span class="keyword1">lemma</span> <a name="deduction_124">deduction</a>:
+      <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>.
+      (<span class="keyword1">forall</span> s: <a href="#state_45">state</a>. <a href="#satisfies_107">satisfies</a> s p -&gt; <a href="#satisfies_107">satisfies</a> s q)
+      -&gt;
+      <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p q)
+
+<span class="comment">(* programs include invariants as annotations *)</span>
+
+<span class="keyword1">type</span> <a name="stmt_135">stmt</a> =
+     | <a name="Sskip_136">Sskip</a>
+     | <a name="Sassign_137">Sassign</a> <a href="#ident_15">ident</a> <a href="#expr_24">expr</a>
+     | <a name="Sif_138">Sif</a> <a href="#bexpr_34">bexpr</a> stmt stmt
+     | <a name="Swhile_139">Swhile</a> <a href="#bexpr_34">bexpr</a> <a href="#fmla_94">fmla</a> stmt
+     | <a name="Sseq_140">Sseq</a> stmt stmt
+
+<span class="comment">(* This notion of size of programs will be useful   *)</span>
+<span class="comment">(* to construct variants because of the seqseq rule *)</span>
+
+<span class="keyword1">function</span> <a name="size_147">size</a> (c:<a href="#stmt_135">stmt</a>) : int =
+<span class="keyword1">match</span> c <span class="keyword1">with</span>
+| <a href="#Sskip_136">Sskip</a> -&gt; 1
+| <a href="#Sassign_137">Sassign</a> _ _ -&gt; 1
+| <a href="#Sif_138">Sif</a> _ c1 c2 -&gt; 1 <a href="int.html#infix%20+_19">+</a> <a href="#size_147">size</a> c1 <a href="int.html#infix%20+_19">+</a> <a href="#size_147">size</a> c2
+| <a href="#Sseq_140">Sseq</a> c1 c2 -&gt; 1 <a href="int.html#infix%20+_19">+</a> 2<a href="int.html#infix%20*_20">*</a><a href="#size_147">size</a> c1 <a href="int.html#infix%20+_19">+</a> <a href="#size_147">size</a> c2
+| <a href="#Swhile_139">Swhile</a> _ _ c -&gt; 1 <a href="int.html#infix%20+_19">+</a> <a href="#size_147">size</a> c
+<span class="keyword1">end</span>
+
+<span class="comment">(* 3 ways to prove size c &gt;= 0 for all c *)</span>
+
+<span class="comment">(* induction_ty_lex *)</span>
+<span class="comment">(* lemma size_pos : forall c[@induction] :stmt. size c &gt;= 0 *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">lemma</span> <a name="size_posLF_162">size_posLF</a> (c:<a href="#stmt_135">stmt</a>) =
+    <span class="keyword2">ensures</span> { <a href="#size_147">size</a> c <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+<span class="keyword1">match</span> c <span class="keyword1">with</span>
+| <a href="#Sskip_136">Sskip</a> -&gt; ()
+| <a href="#Sassign_137">Sassign</a> _ _ -&gt; ()
+| <a href="#Sif_138">Sif</a> _ c1 c2 -&gt; size_posLF c1 ; size_posLF c2
+| <a href="#Sseq_140">Sseq</a> c1 c2 -&gt; size_posLF c1 ; size_posLF c2
+| <a href="#Swhile_139">Swhile</a> _ _ c -&gt; size_posLF c
+<span class="keyword1">end</span>
+
+<span class="comment">(* An alternative would be to define size as a program function *)</span>
+<span class="comment">(* [could be ghost] *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">function</span> <a name="sizeC_176">sizeC</a> (c:<a href="#stmt_135">stmt</a>) : int =
+    <span class="keyword2">ensures</span> { result <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+<span class="keyword1">match</span> c <span class="keyword1">with</span>
+| <a href="#Sskip_136">Sskip</a> -&gt; 1
+| <a href="#Sassign_137">Sassign</a> _ _ -&gt; 1
+| <a href="#Sif_138">Sif</a> _ c1 c2 -&gt; 1 <a href="int.html#infix%20+_19">+</a> sizeC c1 <a href="int.html#infix%20+_19">+</a> sizeC c2
+| <a href="#Sseq_140">Sseq</a> c1 c2 -&gt; 1 <a href="int.html#infix%20+_19">+</a> 2<a href="int.html#infix%20*_20">*</a>sizeC c1 <a href="int.html#infix%20+_19">+</a> sizeC c2
+| <a href="#Swhile_139">Swhile</a> _ _ c -&gt; 1 <a href="int.html#infix%20+_19">+</a> sizeC c
+<span class="keyword1">end</span>
+
+<span class="comment">(* Natural Semantics *)</span>
+
+<span class="keyword1">inductive</span> <a name="big_step_191">big_step</a> <a href="#state_45">state</a> <a href="#stmt_135">stmt</a> <a href="#state_45">state</a> =
+| <a name="big_step_skip_192">big_step_skip</a>:
+  <span class="keyword1">forall</span> s:<a href="#state_45">state</a>. <a href="#big_step_191">big_step</a> s <a href="#Sskip_136">Sskip</a> s
+
+| <a name="big_step_assign_195">big_step_assign</a>:
+  <span class="keyword1">forall</span> s:<a href="#state_45">state</a>, e:<a href="#expr_24">expr</a>, x:<a href="#ident_15">ident</a>.
+  	 <a href="#big_step_191">big_step</a> s (<a href="#Sassign_137">Sassign</a> x e) (<a href="map.html#set_13">set</a> s x (<a href="#eval_expr_56">eval_expr</a> s e))
+
+| <a name="big_step_seq_199">big_step_seq</a>:
+  <span class="keyword1">forall</span> s1 s2 s3:<a href="#state_45">state</a>, c1 c2:<a href="#stmt_135">stmt</a>.
+  	 <a href="#big_step_191">big_step</a> s1 c1 s2  -&gt;
+  	 <a href="#big_step_191">big_step</a> s2 c2 s3  -&gt;
+  	 <a href="#big_step_191">big_step</a> s1 (<a href="#Sseq_140">Sseq</a> c1 c2) s3
+
+| <a name="big_step_if_true_205">big_step_if_true</a>:
+  <span class="keyword1">forall</span> s s':<a href="#state_45">state</a>, b:<a href="#bexpr_34">bexpr</a>, c1 c2:<a href="#stmt_135">stmt</a>.
+  	 <a href="#eval_bexpr_77">eval_bexpr</a> s b -&gt;
+         <a href="#big_step_191">big_step</a> s c1 s'-&gt;
+         <a href="#big_step_191">big_step</a> s (<a href="#Sif_138">Sif</a> b c1 c2) s'
+
+| <a name="big_step_if_false_211">big_step_if_false</a>:
+  <span class="keyword1">forall</span> s s':<a href="#state_45">state</a>, b:<a href="#bexpr_34">bexpr</a>, c1 c2:<a href="#stmt_135">stmt</a>.
+  	 <span class="keyword1">not</span> (<a href="#eval_bexpr_77">eval_bexpr</a> s b) -&gt;
+         <a href="#big_step_191">big_step</a> s c2 s' -&gt;
+         <a href="#big_step_191">big_step</a> s (<a href="#Sif_138">Sif</a> b c1 c2) s'
+
+| <a name="big_step_while_true_217">big_step_while_true</a>:
+  <span class="keyword1">forall</span> s s' s'':<a href="#state_45">state</a>, b:<a href="#bexpr_34">bexpr</a>, i:<a href="#fmla_94">fmla</a>, c:<a href="#stmt_135">stmt</a>.
+      	 <a href="#eval_bexpr_77">eval_bexpr</a> s b -&gt;
+         <a href="#big_step_191">big_step</a> s c s'  -&gt;
+         <a href="#big_step_191">big_step</a> s' (<a href="#Swhile_139">Swhile</a> b i c) s'' -&gt;
+         <a href="#big_step_191">big_step</a> s (<a href="#Swhile_139">Swhile</a> b i c) s''
+
+| <a name="big_step_while_false_224">big_step_while_false</a>:
+  <span class="keyword1">forall</span> s:<a href="#state_45">state</a>, b:<a href="#bexpr_34">bexpr</a>, i:<a href="#fmla_94">fmla</a>, c:<a href="#stmt_135">stmt</a>.
+      	 <span class="keyword1">not</span> (<a href="#eval_bexpr_77">eval_bexpr</a> s b) -&gt;
+         <a href="#big_step_191">big_step</a> s (<a href="#Swhile_139">Swhile</a> b i c) s
+
+<span class="comment">(* not required but a nice example of using two forms of induction *)</span>
+<span class="comment">(* use induction_ty_lex then induction_pr for the loop case *)</span>
+
+<span class="keyword1">lemma</span> <a name="deterministic_execution_234">deterministic_execution</a> : <span class="keyword1">forall</span> c [@induction]:<a href="#stmt_135">stmt</a>, s s' s'' :<a href="#state_45">state</a>.
+      (<a href="#big_step_191">big_step</a> s c s') -&gt;  (<a href="#big_step_191">big_step</a> s c s'') -&gt; s' = s''
+
+<span class="comment">(* Required for soundness *)</span>
+
+<span class="keyword1">lemma</span> <a name="AssignSeq_241">AssignSeq</a>:
+<span class="keyword1">forall</span> x :<a href="#ident_15">ident</a>, e :<a href="#expr_24">expr</a>, c :<a href="#stmt_135">stmt</a>, s s' :<a href="#state_45">state</a>.
+       <a href="#big_step_191">big_step</a> s (<a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> x e) c) s' -&gt;
+       <a href="#big_step_191">big_step</a> (<a href="map.html#set_13">set</a> s x (<a href="#eval_expr_56">eval_expr</a> s e)) c s'
+
+<span class="keyword1">lemma</span> <a name="IfSeqTrue_246">IfSeqTrue</a>:
+<span class="keyword1">forall</span> b :<a href="#bexpr_34">bexpr</a>, c1 c2 c :<a href="#stmt_135">stmt</a>, s s' :<a href="#state_45">state</a>.
+       <a href="#big_step_191">big_step</a> s (<a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> b c1 c2) c) s' -&gt;
+       <a href="#eval_bexpr_77">eval_bexpr</a> s b -&gt; <a href="#big_step_191">big_step</a> s (<a href="#Sseq_140">Sseq</a> c1 c) s'
+
+<span class="keyword1">lemma</span> <a name="IfSeqFalse_251">IfSeqFalse</a>:
+<span class="keyword1">forall</span> b :<a href="#bexpr_34">bexpr</a>, c1 c2 c :<a href="#stmt_135">stmt</a>, s s' :<a href="#state_45">state</a>.
+       <a href="#big_step_191">big_step</a> s (<a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> b c1 c2) c) s' -&gt;
+       <a href="#eval_bexpr_77">eval_bexpr</a> s (<a href="#Bnot_40">Bnot</a> b) -&gt; <a href="#big_step_191">big_step</a> s (<a href="#Sseq_140">Sseq</a> c2 c) s'
+
+<span class="comment">(* Required for soundness and completeness *)</span>
+
+<span class="keyword1">lemma</span> <a name="SeqSeq_260">SeqSeq</a>:
+<span class="keyword1">forall</span> c1 c2 c:<a href="#stmt_135">stmt</a>, s s' :<a href="#state_45">state</a>.
+       <a href="#big_step_191">big_step</a> s (<a href="#Sseq_140">Sseq</a> c1 (<a href="#Sseq_140">Sseq</a> c2 c)) s'
+       &lt;-&gt;
+       <a href="#big_step_191">big_step</a> s (<a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> c1 c2) c) s'
+
+<span class="keyword1">end</span>
+
+<span class="keyword1">theory</span> <a name="Updates_">Updates</a>
+
+<span class="keyword1">use</span> <a href="#ImpLanguage_">ImpLanguage</a>
+
+<span class="comment">(* updates are (total) mappings *)</span>
+
+<span class="keyword1">type</span> <a name="upd_281">upd</a> = <a href="map.html#map_9">map</a> <a href="#ident_15">ident</a> <a href="#expr_24">expr</a>
+
+<span class="comment">(* The empty update will be represented as the identity mapping       *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">constant</span> <a name="idUpd_286">idUpd</a> : <a href="#upd_281">upd</a> =
+             <span class="keyword1">fun</span> (x:<a href="#ident_15">ident</a>) -&gt; <a href="#Evar_26">Evar</a> x
+
+<span class="keyword1">predicate</span> <a name="isId_289">isId</a> (u:<a href="#upd_281">upd</a>) =
+	  <span class="keyword1">forall</span> a: <a href="#ident_15">ident</a>. <a href="map.html#get_11">get</a> u a = <a href="#Evar_26">Evar</a> a
+
+<span class="comment">(* update application to states *)</span>
+
+<span class="keyword1">function</span> <a name="applyS_296">applyS</a> (u:<a href="#upd_281">upd</a>) (s:<a href="#state_45">state</a>) : <a href="#state_45">state</a> =
+	 <span class="keyword1">fun</span> (x:<a href="#ident_15">ident</a>) -&gt; <a href="#eval_expr_56">eval_expr</a> s (u x)
+
+<span class="keyword1">lemma</span> <a name="applySId_299">applySId</a>:
+      <span class="keyword1">forall</span> u :<a href="#upd_281">upd</a>, s :<a href="#state_45">state</a>.
+      <a href="#isId_289">isId</a> u -&gt; <a href="#applyS_296">applyS</a> u s = s
+
+<span class="comment">(* update application to expressions  *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">function</span> <a name="applyE_306">applyE</a> (u:<a href="#upd_281">upd</a>) (e:<a href="#expr_24">expr</a>) : <a href="#expr_24">expr</a> =
+    <span class="keyword2">ensures</span> { <span class="keyword1">forall</span> s :<a href="#state_45">state</a>. <a href="#eval_expr_56">eval_expr</a> s result = <a href="#eval_expr_56">eval_expr</a> (<a href="#applyS_296">applyS</a> u s) e }
+    <span class="keyword2">variant</span> { e }
+<span class="keyword1">match</span> e <span class="keyword1">with</span>
+      | <a href="#Econst_25">Econst</a> n -&gt; <a href="#Econst_25">Econst</a> n
+      | <a href="#Evar_26">Evar</a> x -&gt; <a href="map.html#get_11">get</a> u x
+      | <a href="#Ebin_27">Ebin</a> e1 op e2 -&gt; <a href="#Ebin_27">Ebin</a> (applyE u e1) op (applyE u e2)
+ <span class="keyword1">end</span>
+
+<span class="comment">(* could be logic function + lemma   *)</span>
+
+<span class="comment">(* lemma exprUpdate: forall s:state, e[@induction]:expr, u: upd. *)</span>
+<span class="comment">(*       		  eval_expr s (applyE u e) = eval_expr (applyS u s) e *)</span>
+
+<span class="comment">(* let rec lemma exprUpdateLF  (s:state) (e: expr) (u: upd) : unit *)</span>
+<span class="comment">(*     ensures { eval_expr s (applyE u e) = eval_expr (applyS u s) e } *)</span>
+<span class="comment">(*     variant { e } *)</span>
+<span class="comment">(* = match e with *)</span>
+<span class="comment">(*       | Econst _ -&gt; () *)</span>
+<span class="comment">(*       | Evar _ -&gt; () *)</span>
+<span class="comment">(*       | Ebin e1 _ e2 -&gt; exprUpdateLF s e1 u; exprUpdateLF s e2 u *)</span>
+<span class="comment">(* end *)</span>
+
+<span class="comment">(* lemma applyEId: *)</span>
+<span class="comment">(*       forall u :upd, e[@induction] :expr. *)</span>
+<span class="comment">(*       isId u -&gt; applyE u e = e *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">lemma</span> <a name="applyEIdLF_339">applyEIdLF</a> (u:<a href="#upd_281">upd</a>) (e:<a href="#expr_24">expr</a>)
+    <span class="keyword2">requires</span> { <a href="#isId_289">isId</a> u }
+    <span class="keyword2">ensures</span>  { <a href="#applyE_306">applyE</a> u e = e }
+= <span class="keyword1">match</span> e <span class="keyword1">with</span>
+      | <a href="#Econst_25">Econst</a> _ -&gt; ()
+      | <a href="#Evar_26">Evar</a> _ -&gt; ()
+      | <a href="#Ebin_27">Ebin</a> e1 _ e2 -&gt; applyEIdLF u e1 ; applyEIdLF u e2
+<span class="keyword1">end</span>
+
+<span class="comment">(* update application to Boolean expressions *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">ghost</span> <span class="keyword1">function</span> <a name="applyB_351">applyB</a> (u:<a href="#upd_281">upd</a>) (b:<a href="#bexpr_34">bexpr</a>) : <a href="#bexpr_34">bexpr</a> =
+    <span class="keyword2">ensures</span> { <span class="keyword1">forall</span> s :<a href="#state_45">state</a>. <a href="#eval_bexpr_77">eval_bexpr</a> s result &lt;-&gt; <a href="#eval_bexpr_77">eval_bexpr</a> (<a href="#applyS_296">applyS</a> u s) b }
+    <span class="keyword2">variant</span> { b }
+<span class="keyword1">match</span> b <span class="keyword1">with</span>
+      | <a href="#Bcomp_35">Bcomp</a> e1 bop e2 -&gt; <a href="#Bcomp_35">Bcomp</a> (<a href="#applyE_306">applyE</a> u e1) bop (<a href="#applyE_306">applyE</a> u e2)
+      | <a href="#Btrue_36">Btrue</a> -&gt; <a href="#Btrue_36">Btrue</a>
+      | <a href="#Bfalse_37">Bfalse</a> -&gt; <a href="#Bfalse_37">Bfalse</a>
+      | <a href="#Band_38">Band</a> b1 b2 -&gt; <a href="#Band_38">Band</a> (applyB u b1) (applyB u b2)
+      | <a href="#Bor_39">Bor</a> b1 b2 -&gt; <a href="#Bor_39">Bor</a> (applyB u b1) (applyB u b2)
+      | <a href="#Bnot_40">Bnot</a> b1 -&gt; <a href="#Bnot_40">Bnot</a> (applyB u b1)
+<span class="keyword1">end</span>
+
+<span class="comment">(* lemma applyBId: *)</span>
+<span class="comment">(*       forall u :upd, b[@induction] :bexpr. *)</span>
+<span class="comment">(*       isId u -&gt; applyB u b = b *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">lemma</span> <a name="applyBIdLF_369">applyBIdLF</a> (u:<a href="#upd_281">upd</a>) (b:<a href="#bexpr_34">bexpr</a>)
+    <span class="keyword2">requires</span> { <a href="#isId_289">isId</a> u }
+    <span class="keyword2">ensures</span> { <a href="#applyB_351">applyB</a> u b = b }
+= <span class="keyword1">match</span> b <span class="keyword1">with</span>
+      | <a href="#Bcomp_35">Bcomp</a> _ _ _  -&gt; ()
+      | <a href="#Btrue_36">Btrue</a> -&gt; ()
+      | <a href="#Bfalse_37">Bfalse</a> -&gt; ()
+      | <a href="#Band_38">Band</a> b1 b2 -&gt; applyBIdLF u b1 ; applyBIdLF u b2
+      | <a href="#Bor_39">Bor</a> b1 b2 -&gt; applyBIdLF u b1 ; applyBIdLF u b2
+      | <a href="#Bnot_40">Bnot</a> b1 -&gt; applyBIdLF u b1
+<span class="keyword1">end</span>
+
+<span class="comment">(* update application to formulas *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">ghost</span> <span class="keyword1">function</span> <a name="applyF_386">applyF</a> (u:<a href="#upd_281">upd</a>) (p:<a href="#fmla_94">fmla</a>) : <a href="#fmla_94">fmla</a> =
+    <span class="keyword2">ensures</span> { <span class="keyword1">forall</span> s :<a href="#state_45">state</a>. <a href="#satisfies_107">satisfies</a> s result &lt;-&gt; <a href="#satisfies_107">satisfies</a> (<a href="#applyS_296">applyS</a> u s) p }
+    <span class="keyword2">variant</span> { p }
+<span class="keyword1">match</span> p <span class="keyword1">with</span>
+      | <a href="#Fcomp_95">Fcomp</a> e1 bop e2 -&gt; <a href="#Fcomp_95">Fcomp</a> (<a href="#applyE_306">applyE</a> u e1) bop (<a href="#applyE_306">applyE</a> u e2)
+      | <a href="#Fembed_96">Fembed</a> b -&gt;  <a href="#Fembed_96">Fembed</a> (<a href="#applyB_351">applyB</a> u b)
+      | <a href="#Ftrue_97">Ftrue</a> -&gt; <a href="#Ftrue_97">Ftrue</a>
+      | <a href="#Ffalse_98">Ffalse</a> -&gt; <a href="#Ffalse_98">Ffalse</a>
+      | <a href="#Fand_99">Fand</a> p1 p2 -&gt;  <a href="#Fand_99">Fand</a> (applyF u p1) (applyF u p2)
+      | <a href="#For_100">For</a> p1 p2 -&gt;  <a href="#For_100">For</a> (applyF u p1) (applyF u p2)
+      | <a href="#Fnot_101">Fnot</a> p1 -&gt; <a href="#Fnot_101">Fnot</a> (applyF u p1)
+      | <a href="#Fimplies_102">Fimplies</a> p1 p2 -&gt; <a href="#Fimplies_102">Fimplies</a> (applyF u p1) (applyF u p2)
+<span class="keyword1">end</span>
+
+<span class="comment">(* lemma applyFId: *)</span>
+<span class="comment">(*       forall u :upd, p[@induction] :fmla. *)</span>
+<span class="comment">(*       isId u -&gt; applyF u p = p *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">lemma</span> <a name="applyFIdLF_405">applyFIdLF</a> (u:<a href="#upd_281">upd</a>) (p:<a href="#fmla_94">fmla</a>)
+    <span class="keyword2">requires</span> { <a href="#isId_289">isId</a> u }
+    <span class="keyword2">ensures</span> { <a href="#applyF_386">applyF</a> u p = p }
+= <span class="keyword1">match</span> p <span class="keyword1">with</span>
+      | <a href="#Fcomp_95">Fcomp</a> _ _ _  -&gt; ()
+      | <a href="#Fembed_96">Fembed</a> _ -&gt;  ()
+      | <a href="#Ftrue_97">Ftrue</a> -&gt; ()
+      | <a href="#Ffalse_98">Ffalse</a> -&gt; ()
+      | <a href="#Fand_99">Fand</a> p1 p2 -&gt; applyFIdLF u p1 ; applyFIdLF u p2
+      | <a href="#For_100">For</a> p1 p2 -&gt; applyFIdLF u p1 ; applyFIdLF u p2
+      | <a href="#Fnot_101">Fnot</a> p1 -&gt; applyFIdLF u p1
+      | <a href="#Fimplies_102">Fimplies</a> p1 p2 -&gt; applyFIdLF u p1 ; applyFIdLF u p2
+<span class="keyword1">end</span>
+
+<span class="comment">(* &quot;update update&quot; with an assignment *)</span>
+<span class="comment">(* If defined as program function it would necessarily *)</span>
+<span class="comment">(* be ghost since the map set function is ghost *)</span>
+
+<span class="keyword1">function</span> <a name="assign_425">assign</a> (u:<a href="#upd_281">upd</a>) (x:<a href="#ident_15">ident</a>) (e:<a href="#expr_24">expr</a>) : <a href="#upd_281">upd</a> =
+	 <a href="map.html#set_13">set</a> u x (<a href="#applyE_306">applyE</a> u e)
+
+<span class="comment">(* interaction between assignment and application of update to state *)</span>
+
+<span class="keyword1">lemma</span> <a name="applySAssign_431">applySAssign</a> :
+      <span class="keyword1">forall</span>  x: <a href="#ident_15">ident</a>, e: <a href="#expr_24">expr</a>, u: <a href="#upd_281">upd</a>, s: <a href="#state_45">state</a>.
+      <a href="#applyS_296">applyS</a> (<a href="#assign_425">assign</a> u x e) s = <span class="keyword1">let</span> s' = <a href="#applyS_296">applyS</a> u s
+      	     	       	      	<span class="keyword1">in</span> <a href="map.html#set_13">set</a> s' x (<a href="#eval_expr_56">eval_expr</a> s' e)
+
+<span class="comment">(* Some tests... *)</span>
+
+<span class="keyword1">goal</span> <a name="AssignTest1_440">AssignTest1</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> u = (<span class="keyword1">fun</span> _ -&gt; <a href="#Econst_25">Econst</a> 2) <span class="keyword1">in</span>                     <span class="comment">(* constant update in two differente senses... *)</span>
+     <span class="keyword1">let</span> u = <a href="#assign_425">assign</a> u x (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> x) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 13)) <span class="keyword1">in</span>
+     <a href="map.html#get_11">get</a> u x =  (<a href="#Ebin_27">Ebin</a> (<a href="#Econst_25">Econst</a> 2) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 13))
+
+<span class="keyword1">goal</span> <a name="AssignTest2_446">AssignTest2</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> u = <a href="#idUpd_286">idUpd</a> <span class="keyword1">in</span>                                   <span class="comment">(* identity update *)</span>
+     <span class="keyword1">let</span> u = <a href="#assign_425">assign</a> u x (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> x) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 10)) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> u = <a href="#assign_425">assign</a> u x (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> x) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 20)) <span class="keyword1">in</span>
+     <a href="map.html#get_11">get</a> u x = <a href="#Ebin_27">Ebin</a> (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> x) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 10)) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 20)
+
+<span class="keyword1">goal</span> <a name="AssignTestSwap_453">AssignTestSwap</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> y = <a href="#MkIdent_16">MkIdent</a> 1 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> t = <a href="#MkIdent_16">MkIdent</a> 2 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> u = <a href="#idUpd_286">idUpd</a> <span class="keyword1">in</span>
+     <span class="keyword1">let</span> u = <a href="#assign_425">assign</a> u t (<a href="#Evar_26">Evar</a> x) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> u = <a href="#assign_425">assign</a> u x (<a href="#Evar_26">Evar</a> y) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> u = <a href="#assign_425">assign</a> u y (<a href="#Evar_26">Evar</a> t) <span class="keyword1">in</span>
+     (<a href="map.html#get_11">get</a> u y = <a href="#Evar_26">Evar</a> x) /\  (<a href="map.html#get_11">get</a> u x = <a href="#Evar_26">Evar</a> y)
+
+<span class="keyword1">goal</span> <a name="AssignTestSwap2_463">AssignTestSwap2</a> :
+     <span class="keyword1">forall</span> x y t :<a href="#ident_15">ident</a>, u u1 u2 u3 :<a href="#upd_281">upd</a>.
+     x &lt;&gt; t -&gt; y &lt;&gt; t -&gt;
+     <a href="#isId_289">isId</a> u -&gt;
+     u1 = <a href="#assign_425">assign</a> u t (<a href="#Evar_26">Evar</a> x) -&gt;
+     u2 = <a href="#assign_425">assign</a> u1 x (<a href="#Evar_26">Evar</a> y) -&gt;
+     u3 = <a href="#assign_425">assign</a> u2 y (<a href="#Evar_26">Evar</a> t) -&gt;
+     (<a href="map.html#get_11">get</a> u3 y = <a href="#Evar_26">Evar</a> x) /\ (<a href="map.html#get_11">get</a> u3 x = <a href="#Evar_26">Evar</a> y)
+
+<span class="keyword1">end</span>
+
+<span class="keyword1">theory</span> <a name="Semantics_">Semantics</a>
+
+<span class="keyword1">use</span> <span class="keyword1">export</span> <a href="#ImpLanguage_">ImpLanguage</a>
+<span class="keyword1">use</span> <span class="keyword1">export</span> <a href="#Updates_">Updates</a>
+
+<span class="comment">(* Hoare triples *)</span>
+
+<span class="keyword1">predicate</span> <a name="valid_triple_485">valid_triple</a> (p:<a href="#fmla_94">fmla</a>) (u:<a href="#upd_281">upd</a>) (c:<a href="#stmt_135">stmt</a>) (q:<a href="#fmla_94">fmla</a>) =
+	  <span class="keyword1">forall</span> s s' :<a href="#state_45">state</a>.
+	  	 <a href="#satisfies_107">satisfies</a> s p -&gt;
+		 <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) c s' -&gt;
+		 <a href="#satisfies_107">satisfies</a> s' q
+
+<span class="comment">(* Example triples tested for validity *)</span>
+
+<span class="keyword1">goal</span> <a name="TestValidTripleSimpleProg1_495">TestValidTripleSimpleProg1</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> y = <a href="#MkIdent_16">MkIdent</a> 1 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> prog = <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> y (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> y) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 10))) <a href="#Sskip_136">Sskip</a> <span class="keyword1">in</span>
+     <span class="keyword1">let</span> p = <a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> x) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> q = <a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> x) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 10)) <span class="keyword1">in</span>
+     <a href="#valid_triple_485">valid_triple</a> p <a href="#idUpd_286">idUpd</a> prog q
+
+<span class="keyword1">goal</span> <a name="TestValidTripleSimpleProg2_504">TestValidTripleSimpleProg2</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> y = <a href="#MkIdent_16">MkIdent</a> 1 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> prog = <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> y (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> y) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 10))) <a href="#Sskip_136">Sskip</a> <span class="keyword1">in</span>
+     <span class="keyword1">let</span> p = <a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> x) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> q = <a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> x) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 10)) <span class="keyword1">in</span>
+     <a href="#valid_triple_485">valid_triple</a> p <a href="#idUpd_286">idUpd</a> prog q
+
+<span class="keyword1">goal</span> <a name="TestValidTripleSwapProg_513">TestValidTripleSwapProg</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> y = <a href="#MkIdent_16">MkIdent</a> 1 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> t = <a href="#MkIdent_16">MkIdent</a> 2 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> a = <a href="#MkIdent_16">MkIdent</a> 3 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> b = <a href="#MkIdent_16">MkIdent</a> 4 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> swap = <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> t (<a href="#Evar_26">Evar</a> x))
+     	      	     (<a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> x (<a href="#Evar_26">Evar</a> y))
+		     	   (<a href="#Sassign_137">Sassign</a> y (<a href="#Evar_26">Evar</a> t))) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> p = <a href="#Fand_99">Fand</a> (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> x) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> a)) (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> b)) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> q = <a href="#Fand_99">Fand</a> (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> a)) (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> x) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> b)) <span class="keyword1">in</span>
+     <a href="#valid_triple_485">valid_triple</a> p <a href="#idUpd_286">idUpd</a> swap q
+
+<span class="keyword1">goal</span> <a name="TestValidTripleAltSwapProg_527">TestValidTripleAltSwapProg</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> y = <a href="#MkIdent_16">MkIdent</a> 1 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> t = <a href="#MkIdent_16">MkIdent</a> 2 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> a = <a href="#MkIdent_16">MkIdent</a> 3 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> b = <a href="#MkIdent_16">MkIdent</a> 4 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> swap = <a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> t (<a href="#Evar_26">Evar</a> x))
+     	      	     	   (<a href="#Sassign_137">Sassign</a> x (<a href="#Evar_26">Evar</a> y)))
+		     (<a href="#Sassign_137">Sassign</a> y (<a href="#Evar_26">Evar</a> t)) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> p = <a href="#Fand_99">Fand</a> (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> x) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> a)) (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> b)) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> q = <a href="#Fand_99">Fand</a> (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> a)) (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> x) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> b)) <span class="keyword1">in</span>
+     <a href="#valid_triple_485">valid_triple</a> p <a href="#idUpd_286">idUpd</a> swap q
+
+<span class="keyword1">end</span>
+
+<span class="keyword1">theory</span> <a name="SystemHu_">SystemHu</a>
+
+<span class="keyword1">use</span> <a href="#Semantics_">Semantics</a>
+
+<span class="comment">(* Inference system of Hoare Logic with Updates   *)</span>
+<span class="comment">(* DOES NOT MAKE USE OF ANNOTATED LOOP INVARIANTS *)</span>
+
+<span class="keyword1">inductive</span> <a name="infHu_554">infHu</a> <a href="#fmla_94">fmla</a> <a href="#upd_281">upd</a> <a href="#stmt_135">stmt</a> <a href="#fmla_94">fmla</a> =
+
+| <a name="infHu_skip_556">infHu_skip</a>:
+  <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>.
+  <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u q)) -&gt;
+  <a href="#infHu_554">infHu</a> p u <a href="#Sskip_136">Sskip</a> q
+
+| <a name="infHu_assign_561">infHu_assign</a>:
+  <span class="keyword1">forall</span> p :<a href="#fmla_94">fmla</a>, q :<a href="#fmla_94">fmla</a>, x :<a href="#ident_15">ident</a>, e :<a href="#expr_24">expr</a>, u :<a href="#upd_281">upd</a>.
+       <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> (<a href="#assign_425">assign</a> u x e) q))  -&gt;
+       <a href="#infHu_554">infHu</a> p u (<a href="#Sassign_137">Sassign</a> x e) q
+
+| <a name="infHu_if_566">infHu_if</a>:
+  <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, c1 c2 :<a href="#stmt_135">stmt</a>, b :<a href="#bexpr_34">bexpr</a>, u :<a href="#upd_281">upd</a>.
+  	 <a href="#infHu_554">infHu</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fembed_96">Fembed</a> b))) u c1 q -&gt;
+  	 <a href="#infHu_554">infHu</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) u c2 q -&gt;
+  	 <a href="#infHu_554">infHu</a> p u (<a href="#Sif_138">Sif</a> b c1 c2) q
+
+| <a name="infHu_while_572">infHu_while</a>:
+  <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, c :<a href="#stmt_135">stmt</a>, b :<a href="#bexpr_34">bexpr</a>, inv ainv :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>.
+  	 <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u inv)) -&gt;
+         <a href="#infHu_554">infHu</a> (<a href="#Fand_99">Fand</a> inv (<a href="#Fembed_96">Fembed</a> b)) <a href="#idUpd_286">idUpd</a> c inv -&gt;
+  	 <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> (<a href="#Fand_99">Fand</a> inv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) q) -&gt;
+  	 <a href="#infHu_554">infHu</a> p u (<a href="#Swhile_139">Swhile</a> b ainv c) q
+
+| <a name="infHu_skipseq_579">infHu_skipseq</a>:
+  <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>, c :<a href="#stmt_135">stmt</a>.
+  <a href="#infHu_554">infHu</a> p u c q -&gt;
+  <a href="#infHu_554">infHu</a> p u (<a href="#Sseq_140">Sseq</a> <a href="#Sskip_136">Sskip</a> c) q
+
+| <a name="infHu_assignseq_584">infHu_assignseq</a>:
+  <span class="keyword1">forall</span> p :<a href="#fmla_94">fmla</a>, q :<a href="#fmla_94">fmla</a>, x :<a href="#ident_15">ident</a>, e :<a href="#expr_24">expr</a>, c :<a href="#stmt_135">stmt</a>, u :<a href="#upd_281">upd</a>.
+       <a href="#infHu_554">infHu</a> p (<a href="#assign_425">assign</a> u x e) c q -&gt;
+       <a href="#infHu_554">infHu</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> x e) c) q
+
+| <a name="infHu_ifseq_589">infHu_ifseq</a>:
+  <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, c1 c2 c :<a href="#stmt_135">stmt</a>, b :<a href="#bexpr_34">bexpr</a>, u :<a href="#upd_281">upd</a>.
+  	 <a href="#infHu_554">infHu</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fembed_96">Fembed</a> b))) u (<a href="#Sseq_140">Sseq</a> c1 c) q -&gt;
+  	 <a href="#infHu_554">infHu</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) u (<a href="#Sseq_140">Sseq</a> c2 c) q -&gt;
+  	 <a href="#infHu_554">infHu</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> b c1 c2) c) q
+
+| <a name="infHu_whileseq_595">infHu_whileseq</a>:
+  <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, c cc :<a href="#stmt_135">stmt</a>, b :<a href="#bexpr_34">bexpr</a>, inv ainv :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>.
+  	 <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u inv)) -&gt;
+         <a href="#infHu_554">infHu</a> (<a href="#Fand_99">Fand</a> inv (<a href="#Fembed_96">Fembed</a> b)) <a href="#idUpd_286">idUpd</a> c inv -&gt;
+  	 <a href="#infHu_554">infHu</a> (<a href="#Fand_99">Fand</a> inv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) <a href="#idUpd_286">idUpd</a> cc q -&gt;
+  	 <a href="#infHu_554">infHu</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Swhile_139">Swhile</a> b ainv c) cc) q
+
+| <a name="infHu_seqseq_602">infHu_seqseq</a>:
+  <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, c1 c2 c :<a href="#stmt_135">stmt</a>, u :<a href="#upd_281">upd</a>.
+  	 <a href="#infHu_554">infHu</a> p u (<a href="#Sseq_140">Sseq</a> c1 (<a href="#Sseq_140">Sseq</a> c2 c)) q -&gt;
+  	 <a href="#infHu_554">infHu</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> c1 c2) c) q
+
+<span class="comment">(* Example inferences *)</span>
+
+<span class="keyword1">goal</span> <a name="TestInfSimpleProg1_612">TestInfSimpleProg1</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> y = <a href="#MkIdent_16">MkIdent</a> 1 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> prog = <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> y (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> y) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 10))) <a href="#Sskip_136">Sskip</a> <span class="keyword1">in</span>
+     <span class="keyword1">let</span> p = <a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> x) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> q = <a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> x) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 10)) <span class="keyword1">in</span>
+     <a href="#infHu_554">infHu</a> p <a href="#idUpd_286">idUpd</a> prog q
+
+<span class="keyword1">goal</span> <a name="TestInfSimpleProg2_621">TestInfSimpleProg2</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> y = <a href="#MkIdent_16">MkIdent</a> 1 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> prog = <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> y (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> y) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 10))) <a href="#Sskip_136">Sskip</a> <span class="keyword1">in</span>
+     <span class="keyword1">let</span> p = <a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> x) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> q = <a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Ebin_27">Ebin</a> (<a href="#Evar_26">Evar</a> x) <a href="#Oplus_22">Oplus</a> (<a href="#Econst_25">Econst</a> 10)) <span class="keyword1">in</span>
+     <a href="#infHu_554">infHu</a> p <a href="#idUpd_286">idUpd</a> prog q
+
+<span class="keyword1">goal</span> <a name="TestInfSwapProg_630">TestInfSwapProg</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> y = <a href="#MkIdent_16">MkIdent</a> 1 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> t = <a href="#MkIdent_16">MkIdent</a> 2 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> a = <a href="#MkIdent_16">MkIdent</a> 3 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> b = <a href="#MkIdent_16">MkIdent</a> 4 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> swap = <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> t (<a href="#Evar_26">Evar</a> x))
+     	      	(<a href="#Sseq_140">Sseq</a>  (<a href="#Sassign_137">Sassign</a> x (<a href="#Evar_26">Evar</a> y))
+		(<a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> y (<a href="#Evar_26">Evar</a> t))
+		 <a href="#Sskip_136">Sskip</a>)) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> p = <a href="#Fand_99">Fand</a> (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> x) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> a)) (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> b)) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> q = <a href="#Fand_99">Fand</a> (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> a)) (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> x) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> b)) <span class="keyword1">in</span>
+     <a href="#infHu_554">infHu</a> p <a href="#idUpd_286">idUpd</a> swap q
+
+<span class="keyword1">goal</span> <a name="TestInfAltSwapProg_645">TestInfAltSwapProg</a> :
+     <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> y = <a href="#MkIdent_16">MkIdent</a> 1 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> t = <a href="#MkIdent_16">MkIdent</a> 2 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> a = <a href="#MkIdent_16">MkIdent</a> 3 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> b = <a href="#MkIdent_16">MkIdent</a> 4 <span class="keyword1">in</span>
+     <span class="keyword1">let</span> swap = <a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a>  (<a href="#Sassign_137">Sassign</a> t (<a href="#Evar_26">Evar</a> x))
+     	      	     	    (<a href="#Sassign_137">Sassign</a> x (<a href="#Evar_26">Evar</a> y)))
+		     (<a href="#Sassign_137">Sassign</a> y (<a href="#Evar_26">Evar</a> t)) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> p = <a href="#Fand_99">Fand</a> (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> x) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> a)) (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> b)) <span class="keyword1">in</span>
+     <span class="keyword1">let</span> q = <a href="#Fand_99">Fand</a> (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> a)) (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> x) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> b)) <span class="keyword1">in</span>
+     <a href="#infHu_554">infHu</a> p <a href="#idUpd_286">idUpd</a> swap q
+
+<span class="keyword1">end</span>
+
+<span class="keyword1">theory</span> <a name="HuSoundness_">HuSoundness</a>
+
+<span class="keyword1">use</span> <a href="#Semantics_">Semantics</a>
+<span class="keyword1">use</span> <a href="#SystemHu_">SystemHu</a>
+
+<span class="comment">(* The following three lemmas are required *)</span>
+
+<span class="comment">(* the first is proved using &quot;induction_pr&quot; after &quot;unfold valid_triple *)
+(* the others follow from the first without induction *)
+
+lemma core_while_rule:
+forall c:stmt, b:bexpr, inv :fmla.
+       valid_triple (Fand inv (Fembed b)) idUpd c inv -&gt;
+       forall ainv:fmla. valid_triple inv idUpd (Swhile b ainv c) (Fand inv (Fnot (Fembed b)))
+
+lemma while_rule:
+forall c:stmt, u:upd, b:bexpr, inv ainv p q :fmla.
+       valid_triple (Fand inv (Fembed b)) idUpd c inv -&gt;
+       valid_fmla (Fimplies p (applyF u inv)) -&gt;
+       valid_fmla (Fimplies (Fand inv (Fnot (Fembed b))) q) -&gt;
+       valid_triple p u (Swhile b ainv c) q
+
+lemma seq_while_rule:
+forall c cc:stmt, b:bexpr, u:upd, p q inv ainv :fmla.
+       valid_fmla (Fimplies p (applyF u inv)) -&gt;
+       valid_triple (Fand inv (Fembed b)) idUpd c inv -&gt;
+       valid_triple (Fand inv (Fnot (Fembed b))) idUpd cc q -&gt;
+       valid_triple p u (Sseq (Swhile b ainv c) cc) q
+
+
+
+(* proved with &quot;induction_pr&quot; *)
+
+lemma infHu_sound :
+forall c :stmt, u :upd, p q :fmla.
+       infHu p u c q -&gt; valid_triple p u c q
+
+end
+
+
+
+
+theory HuSoundness_LF
+
+use Semantics
+use SystemHu
+
+
+(* Alternative proof using a lemma function *)
+(* Interestingly, induction_pr can be replaced by structural induction *)
+
+
+(* Only the following core rule about loops is required *)
+(* The above proof needed more intermediate results *)
+(* probably because with the function lemma the control *)
+(* over quantifiers is tight, and no generality is lost *)
+
+(* proved using &quot;induction_pr&quot; after &quot;unfold valid_triple *)</span>
+
+<span class="keyword1">lemma</span> <a name="core_while_rule_722">core_while_rule</a>:
+<span class="keyword1">forall</span> c:<a href="#stmt_135">stmt</a>, b:<a href="#bexpr_34">bexpr</a>, inv :<a href="#fmla_94">fmla</a>.
+       <a href="#valid_triple_485">valid_triple</a> (<a href="#Fand_99">Fand</a> inv (<a href="#Fembed_96">Fembed</a> b)) <a href="#idUpd_286">idUpd</a> c inv -&gt;
+       <span class="keyword1">forall</span> ainv :<a href="#fmla_94">fmla</a>. <a href="#valid_triple_485">valid_triple</a> inv <a href="#idUpd_286">idUpd</a> (<a href="#Swhile_139">Swhile</a> b ainv c) (<a href="#Fand_99">Fand</a> inv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))
+
+<span class="comment">(* Lemma function follows the structure of the inductive predicate *)</span>
+<span class="comment">(* termination requires defining an appropriate variant *)</span>
+<span class="comment">(* we use the previously defined function size *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">lemma</span> <a name="infHu_sound_LF_733">infHu_sound_LF</a> (c:<a href="#stmt_135">stmt</a>)
+    <span class="keyword2">ensures</span> { <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>. <a href="#infHu_554">infHu</a> p u c q -&gt;  <a href="#valid_triple_485">valid_triple</a> p u c q }
+    <span class="keyword2">variant</span> { <a href="#size_147">size</a> c }
+=  <span class="keyword1">match</span> c <span class="keyword1">with</span>
+| <a href="#Sskip_136">Sskip</a> -&gt; ()
+| <a href="#Sassign_137">Sassign</a> _ _ -&gt; ()
+| <a href="#Sif_138">Sif</a> _ c1 c2 -&gt; infHu_sound_LF c1 ; infHu_sound_LF c2
+| <a href="#Swhile_139">Swhile</a> _ _ c -&gt; infHu_sound_LF c
+| <a href="#Sseq_140">Sseq</a> <a href="#Sskip_136">Sskip</a> c -&gt; infHu_sound_LF c
+| <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> _ _) c -&gt; infHu_sound_LF c
+| <a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> _ c1 c2) c -&gt; infHu_sound_LF (<a href="#Sseq_140">Sseq</a> c1 c) ; infHu_sound_LF (<a href="#Sseq_140">Sseq</a> c2 c)
+| <a href="#Sseq_140">Sseq</a> (<a href="#Swhile_139">Swhile</a> _ _ c1) c -&gt; infHu_sound_LF c1 ; infHu_sound_LF c
+| <a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> c1 c2) c -&gt; infHu_sound_LF (<a href="#Sseq_140">Sseq</a> c1 (<a href="#Sseq_140">Sseq</a> c2 c))
+<span class="keyword1">end</span>
+
+<span class="keyword1">end</span>
+
+<span class="keyword1">theory</span> <a name="ReverseRules_">ReverseRules</a>
+
+<span class="keyword1">use</span> <span class="keyword1">export</span> <a href="#Semantics_">Semantics</a>
+<span class="keyword1">use</span> <span class="keyword1">export</span> <a href="#SystemHu_">SystemHu</a>
+
+<span class="comment">(* Expressiveness *)</span>
+<span class="comment">(* Following Cooke and Clarke, we postulate the existence of weakest preconditions *)</span>
+<span class="comment">(* This implies that loop invariants exist, defined as the wp of the entire loop   *)</span>
+
+<span class="keyword1">predicate</span> <a name="pre_765">pre</a> (s:<a href="#state_45">state</a>) (c:<a href="#stmt_135">stmt</a>) (q:<a href="#fmla_94">fmla</a>) =
+	  <span class="keyword1">forall</span> s' :<a href="#state_45">state</a>. <a href="#big_step_191">big_step</a> s c s' -&gt; <a href="#satisfies_107">satisfies</a> s' q
+
+<span class="keyword1">val</span> <span class="keyword1">function</span> <a name="wp_769">wp</a> (c:<a href="#stmt_135">stmt</a>) (q:<a href="#fmla_94">fmla</a>) : <a href="#fmla_94">fmla</a>
+    <span class="keyword2">ensures</span> { <span class="keyword1">forall</span> s :<a href="#state_45">state</a>. <a href="#satisfies_107">satisfies</a> s result &lt;-&gt; <a href="#pre_765">pre</a> s c q }
+
+<span class="comment">(* axiom expressiveness : forall c :stmt, q :fmla. *)</span>
+<span class="comment">(*       		  exists p :fmla. forall s :state. (satisfies s p &lt;-&gt; pre s c q)  *)</span>
+
+<span class="comment">(* The following lemmas are required to prove the reverse Hu rules below *)</span>
+<span class="comment">(* wp is used in the lemmas involving loops *)</span>
+
+<span class="keyword1">lemma</span> <a name="valid_triple_skip_781">valid_triple_skip</a> :
+      <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>, s :<a href="#state_45">state</a>.
+      <a href="#valid_triple_485">valid_triple</a> p u <a href="#Sskip_136">Sskip</a> q -&gt;
+      <a href="#satisfies_107">satisfies</a> s p -&gt; <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) <a href="#Sskip_136">Sskip</a> (<a href="#applyS_296">applyS</a> u s) -&gt; <a href="#satisfies_107">satisfies</a> (<a href="#applyS_296">applyS</a> u s) q
+
+<span class="comment">(* This one does not seem to be required... *)</span>
+<span class="comment">(* lemma valid_triple_assign : *)</span>
+<span class="comment">(*       forall p q :fmla, x :ident, e :expr, u :upd, s s&#39; :state. *)</span>
+<span class="comment">(*       valid_triple p u (Sassign x e) q -&gt; *)</span>
+<span class="comment">(*       satisfies s p -&gt; *)</span>
+<span class="comment">(*       big_step (applyS u s) (Sassign x e) (set s x (eval_expr s e)) -&gt; *)</span>
+<span class="comment">(*       satisfies (set s x (eval_expr s e))  q *)</span>
+
+<span class="keyword1">lemma</span> <a name="valid_triple_if_true_794">valid_triple_if_true</a> :
+      <span class="keyword1">forall</span> c1 c2 :<a href="#stmt_135">stmt</a>, b: <a href="#bexpr_34">bexpr</a>, p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>, s s' :<a href="#state_45">state</a>.
+      <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sif_138">Sif</a> b c1 c2) q -&gt;
+      <a href="#satisfies_107">satisfies</a> s p -&gt;
+      <a href="#eval_bexpr_77">eval_bexpr</a> (<a href="#applyS_296">applyS</a> u s) b -&gt;
+      <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) c1 s' -&gt;
+      <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) (<a href="#Sif_138">Sif</a> b c1 c2)  s' /\
+      <a href="#satisfies_107">satisfies</a> s' q
+
+<span class="keyword1">lemma</span> <a name="valid_triple_if_false_803">valid_triple_if_false</a> :
+      <span class="keyword1">forall</span> c1 c2 :<a href="#stmt_135">stmt</a>, b: <a href="#bexpr_34">bexpr</a>, p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>, s s' :<a href="#state_45">state</a>.
+      <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sif_138">Sif</a> b c1 c2) q -&gt;
+      <a href="#satisfies_107">satisfies</a> s p -&gt;
+      <span class="keyword1">not</span> (<a href="#eval_bexpr_77">eval_bexpr</a> (<a href="#applyS_296">applyS</a> u s) b) -&gt;
+      <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) c2 s' -&gt;
+      <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) (<a href="#Sif_138">Sif</a> b c1 c2)  s' /\
+      <a href="#satisfies_107">satisfies</a> s' q
+
+<span class="keyword1">lemma</span> <a name="valid_triple_while_wp_812">valid_triple_while_wp</a> :
+      <span class="keyword1">forall</span> c :<a href="#stmt_135">stmt</a>, b: <a href="#bexpr_34">bexpr</a>, p q ainv :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>.
+      <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Swhile_139">Swhile</a> b ainv c) q -&gt;
+      <span class="keyword1">let</span> inv = <a href="#wp_769">wp</a> (<a href="#Swhile_139">Swhile</a> b ainv c) q <span class="keyword1">in</span>
+      <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u inv)) /\
+      (<span class="keyword1">forall</span> s s':<a href="#state_45">state</a>. <a href="#satisfies_107">satisfies</a> s (<a href="#Fand_99">Fand</a> inv (<a href="#Fembed_96">Fembed</a> b)) -&gt; <a href="#big_step_191">big_step</a> s c s' -&gt; <a href="#satisfies_107">satisfies</a> s' inv) /\
+      <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> (<a href="#Fand_99">Fand</a> inv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) q)
+
+<span class="keyword1">lemma</span> <a name="valid_triple_seq_820">valid_triple_seq</a> :
+      <span class="keyword1">forall</span> c1 c2 :<a href="#stmt_135">stmt</a>, p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>, s s' s'' :<a href="#state_45">state</a>.
+      <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sseq_140">Sseq</a> c1 c2) q -&gt;
+      <a href="#satisfies_107">satisfies</a> s p-&gt; <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) c1 s' -&gt; <a href="#big_step_191">big_step</a> s' c2 s'' -&gt; <a href="#satisfies_107">satisfies</a> s'' q
+
+<span class="keyword1">lemma</span> <a name="valid_triple_if_seq_true_825">valid_triple_if_seq_true</a>:
+      <span class="keyword1">forall</span> c1 c2 cc :<a href="#stmt_135">stmt</a>, b: <a href="#bexpr_34">bexpr</a>, p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>, s s' s'' :<a href="#state_45">state</a>.
+      <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> b c1 c2) cc) q -&gt;
+      <a href="#satisfies_107">satisfies</a> s p -&gt;
+      <a href="#eval_bexpr_77">eval_bexpr</a> (<a href="#applyS_296">applyS</a> u s) b -&gt;
+      <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) c1 s' -&gt;
+      <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) (<a href="#Sif_138">Sif</a> b c1 c2) s' -&gt; <span class="comment">(* this is not required in the lemma but allows it to be proved *)</span>
+      <a href="#big_step_191">big_step</a> s' cc s'' -&gt;
+      <a href="#satisfies_107">satisfies</a> s'' q
+
+<span class="keyword1">lemma</span> <a name="valid_triple_if_seq_false_835">valid_triple_if_seq_false</a> :
+      <span class="keyword1">forall</span> c1 c2 cc :<a href="#stmt_135">stmt</a>, b: <a href="#bexpr_34">bexpr</a>, p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>, s s' s'' :<a href="#state_45">state</a>.
+      <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> b c1 c2) cc) q -&gt;
+      <a href="#satisfies_107">satisfies</a> s p -&gt;
+      <span class="keyword1">not</span> (<a href="#eval_bexpr_77">eval_bexpr</a> (<a href="#applyS_296">applyS</a> u s) b) -&gt;
+      <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) c2 s' -&gt;
+      <a href="#big_step_191">big_step</a> (<a href="#applyS_296">applyS</a> u s) (<a href="#Sif_138">Sif</a> b c1 c2) s' -&gt; <span class="comment">(* same here *)</span>
+      <a href="#big_step_191">big_step</a> s' cc s'' -&gt;
+      <a href="#satisfies_107">satisfies</a> s'' q
+
+<span class="keyword1">lemma</span> <a name="valid_triple_while_seq_845">valid_triple_while_seq</a> :
+      <span class="keyword1">forall</span> c cc :<a href="#stmt_135">stmt</a>, b: <a href="#bexpr_34">bexpr</a>, p q ainv :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>.
+      <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Swhile_139">Swhile</a> b ainv c) cc) q -&gt;
+      <span class="keyword1">let</span> inv = <a href="#wp_769">wp</a> (<a href="#Swhile_139">Swhile</a> b ainv c) (<a href="#wp_769">wp</a> cc q) <span class="keyword1">in</span>
+      <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u inv)) /\
+      (<span class="keyword1">forall</span> s s':<a href="#state_45">state</a>. <a href="#satisfies_107">satisfies</a> s  (<a href="#Fand_99">Fand</a> inv (<a href="#Fembed_96">Fembed</a> b)) -&gt; <a href="#big_step_191">big_step</a> s c s' -&gt; <a href="#satisfies_107">satisfies</a> s' inv) /\
+      (<span class="keyword1">forall</span> s s':<a href="#state_45">state</a>. <a href="#satisfies_107">satisfies</a> s  (<a href="#Fand_99">Fand</a> inv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) -&gt; <a href="#big_step_191">big_step</a> s cc s' -&gt; <a href="#satisfies_107">satisfies</a> s' q)
+
+<span class="comment">(* Reverse rules of Hu *)</span>
+<span class="comment">(* the loop rules state the existence of an invariant *)</span>
+
+<span class="keyword1">lemma</span> <a name="skip_rule_rev_859">skip_rule_rev</a>:
+<span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, u:<a href="#upd_281">upd</a>.
+       <a href="#valid_triple_485">valid_triple</a> p u <a href="#Sskip_136">Sskip</a> q -&gt; <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u q))
+
+<span class="keyword1">lemma</span> <a name="assign_rule_rev_863">assign_rule_rev</a>:
+<span class="keyword1">forall</span> p:<a href="#fmla_94">fmla</a>, q:<a href="#fmla_94">fmla</a>, x:<a href="#ident_15">ident</a>, e:<a href="#expr_24">expr</a>, u:<a href="#upd_281">upd</a>.
+       <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sassign_137">Sassign</a> x e) q -&gt;
+       <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> (<a href="#assign_425">assign</a> u x e) q))
+
+<span class="keyword1">lemma</span> <a name="if_rule_rev_868">if_rule_rev</a>:
+<span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, c1 c2 :<a href="#stmt_135">stmt</a>, b:<a href="#bexpr_34">bexpr</a>, u:<a href="#upd_281">upd</a>.
+       <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sif_138">Sif</a> b c1 c2) q -&gt;
+       <a href="#valid_triple_485">valid_triple</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fembed_96">Fembed</a> b))) u c1 q /\
+       <a href="#valid_triple_485">valid_triple</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) u c2 q
+
+<span class="keyword1">lemma</span> <a name="while_rule_rev_874">while_rule_rev</a>:
+<span class="keyword1">forall</span> c:<a href="#stmt_135">stmt</a>, u:<a href="#upd_281">upd</a>, b:<a href="#bexpr_34">bexpr</a>, ainv p q :<a href="#fmla_94">fmla</a>.
+       <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Swhile_139">Swhile</a> b ainv c) q -&gt;
+       <span class="keyword1">exists</span> inv:<a href="#fmla_94">fmla</a>.
+       <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u inv)) /\
+       <a href="#valid_triple_485">valid_triple</a> (<a href="#Fand_99">Fand</a> inv (<a href="#Fembed_96">Fembed</a> b)) <a href="#idUpd_286">idUpd</a> c inv /\
+       <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> (<a href="#Fand_99">Fand</a> inv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) q)
+
+<span class="keyword1">lemma</span> <a name="seq_skip_rule_rev_882">seq_skip_rule_rev</a>:
+<span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, u:<a href="#upd_281">upd</a>, c :<a href="#stmt_135">stmt</a>.
+       <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sseq_140">Sseq</a> <a href="#Sskip_136">Sskip</a> c) q -&gt; <a href="#valid_triple_485">valid_triple</a> p u c q
+
+<span class="keyword1">lemma</span> <a name="seq_assign_rule_rev_886">seq_assign_rule_rev</a>:
+<span class="keyword1">forall</span> p:<a href="#fmla_94">fmla</a>, q:<a href="#fmla_94">fmla</a>, x:<a href="#ident_15">ident</a>, e:<a href="#expr_24">expr</a>, i:<a href="#stmt_135">stmt</a>, u:<a href="#upd_281">upd</a>.
+       <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> x e) i) q -&gt;
+       <a href="#valid_triple_485">valid_triple</a> p (<a href="#assign_425">assign</a> u x e) i q
+
+<span class="keyword1">lemma</span> <a name="seq_if_rule_rev_891">seq_if_rule_rev</a>:
+<span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, s1 s2 s:<a href="#stmt_135">stmt</a>, b:<a href="#bexpr_34">bexpr</a>, u:<a href="#upd_281">upd</a>.
+       <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> b s1 s2) s) q -&gt;
+       <a href="#valid_triple_485">valid_triple</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fembed_96">Fembed</a> b))) u (<a href="#Sseq_140">Sseq</a> s1 s) q /\
+       <a href="#valid_triple_485">valid_triple</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) u (<a href="#Sseq_140">Sseq</a> s2 s) q
+
+<span class="keyword1">lemma</span> <a name="seq_while_rule_rev_897">seq_while_rule_rev</a>:
+<span class="keyword1">forall</span> p q ainv:<a href="#fmla_94">fmla</a>, c cc:<a href="#stmt_135">stmt</a>, b:<a href="#bexpr_34">bexpr</a>, u:<a href="#upd_281">upd</a>.
+       <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Swhile_139">Swhile</a> b ainv c) cc) q -&gt;
+       <span class="keyword1">exists</span> inv :<a href="#fmla_94">fmla</a>.
+       <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u inv)) /\
+       <a href="#valid_triple_485">valid_triple</a> (<a href="#Fand_99">Fand</a> inv (<a href="#Fembed_96">Fembed</a> b)) <a href="#idUpd_286">idUpd</a> c inv /\
+       <a href="#valid_triple_485">valid_triple</a> (<a href="#Fand_99">Fand</a> inv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) <a href="#idUpd_286">idUpd</a> cc q
+
+<span class="keyword1">lemma</span> <a name="seq_seq_rule_rev_905">seq_seq_rule_rev</a>:
+<span class="keyword1">forall</span> c1 c2 c:<a href="#stmt_135">stmt</a>, u:<a href="#upd_281">upd</a>, p q:<a href="#fmla_94">fmla</a>.
+       <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> c1 c2) c) q -&gt;
+       <a href="#valid_triple_485">valid_triple</a> p u (<a href="#Sseq_140">Sseq</a> c1 (<a href="#Sseq_140">Sseq</a> c2 c)) q
+
+<span class="keyword1">end</span>
+
+<span class="keyword1">theory</span> <a name="HuCompleteness_">HuCompleteness</a>
+
+<span class="keyword1">use</span> <a href="#Semantics_">Semantics</a>
+<span class="keyword1">use</span> <a href="#SystemHu_">SystemHu</a>
+<span class="keyword1">use</span> <a href="#ReverseRules_">ReverseRules</a>
+
+<span class="comment">(* This cannot be proved with induction_ty_lex *)</span>
+
+<span class="comment">(* lemma infHu_complete : *)</span>
+<span class="comment">(* forall c[@induction] :stmt, p q :fmla, u :upd. *)</span>
+<span class="comment">(*        valid_triple p u c q -&gt; infHu p u c q *)</span>
+
+<span class="comment">(* Lemma Function CAN be proved *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">lemma</span> <a name="infHu_complete_LF_931">infHu_complete_LF</a> (c:<a href="#stmt_135">stmt</a>) =
+    <span class="keyword2">ensures</span> { <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>. <a href="#valid_triple_485">valid_triple</a> p u c q -&gt; <a href="#infHu_554">infHu</a> p u c q }
+    <span class="keyword2">variant</span> { <a href="#size_147">size</a> c }
+<span class="keyword1">match</span> c <span class="keyword1">with</span>
+| <a href="#Sskip_136">Sskip</a> -&gt; ()
+| <a href="#Sassign_137">Sassign</a> _ _ -&gt; ()
+| <a href="#Sif_138">Sif</a> _ c1 c2 -&gt; infHu_complete_LF c1 ; infHu_complete_LF c2
+| <a href="#Swhile_139">Swhile</a> _ _ c -&gt; infHu_complete_LF c
+| <a href="#Sseq_140">Sseq</a> <a href="#Sskip_136">Sskip</a> c -&gt; infHu_complete_LF c
+| <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> _ _) c -&gt; infHu_complete_LF c
+| <a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> _ c1 c2) c -&gt; infHu_complete_LF (<a href="#Sseq_140">Sseq</a> c1 c) ; infHu_complete_LF (<a href="#Sseq_140">Sseq</a> c2 c)
+| <a href="#Sseq_140">Sseq</a> (<a href="#Swhile_139">Swhile</a> _ _ c1) c -&gt; infHu_complete_LF c1 ; infHu_complete_LF c
+| <a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> c1 c2) c -&gt; infHu_complete_LF (<a href="#Sseq_140">Sseq</a> c1 (<a href="#Sseq_140">Sseq</a> c2 c))
+<span class="keyword1">end</span>
+
+<span class="keyword1">end</span>
+
+<span class="keyword1">theory</span> <a name="SystemHuAnnot_">SystemHuAnnot</a>
+
+<span class="keyword1">use</span> <a href="#Semantics_">Semantics</a>
+<span class="keyword1">use</span> <a href="#SystemHu_">SystemHu</a>
+
+<span class="comment">(* Inference system directed by annotated invariants *)</span>
+
+<span class="keyword1">inductive</span> <a name="infHuA_961">infHuA</a> <a href="#fmla_94">fmla</a> <a href="#upd_281">upd</a> <a href="#stmt_135">stmt</a> <a href="#fmla_94">fmla</a> =
+
+| <a name="infHuA_skip_963">infHuA_skip</a>:
+  <span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, u:<a href="#upd_281">upd</a>.
+  <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u q)) -&gt;
+  <a href="#infHuA_961">infHuA</a> p u <a href="#Sskip_136">Sskip</a> q
+
+| <a name="infHuA_assign_968">infHuA_assign</a>:
+  <span class="keyword1">forall</span> p:<a href="#fmla_94">fmla</a>, q:<a href="#fmla_94">fmla</a>, x:<a href="#ident_15">ident</a>, e:<a href="#expr_24">expr</a>, u:<a href="#upd_281">upd</a>.
+       <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> (<a href="#assign_425">assign</a> u x e) q))  -&gt;
+       <a href="#infHuA_961">infHuA</a> p u (<a href="#Sassign_137">Sassign</a> x e) q
+
+| <a name="infHuA_if_973">infHuA_if</a>:
+  <span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, c1 c2 :<a href="#stmt_135">stmt</a>, b:<a href="#bexpr_34">bexpr</a>, u:<a href="#upd_281">upd</a>.
+  	 <a href="#infHuA_961">infHuA</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fembed_96">Fembed</a> b))) u c1 q -&gt;
+  	 <a href="#infHuA_961">infHuA</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) u c2 q -&gt;
+  	 <a href="#infHuA_961">infHuA</a> p u (<a href="#Sif_138">Sif</a> b c1 c2) q
+
+| <a name="infHuA_while_979">infHuA_while</a>:
+  <span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, c :<a href="#stmt_135">stmt</a>, b:<a href="#bexpr_34">bexpr</a>, ainv:<a href="#fmla_94">fmla</a>, u:<a href="#upd_281">upd</a>.
+  	 <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u ainv)) -&gt;
+         <a href="#infHuA_961">infHuA</a> (<a href="#Fand_99">Fand</a> ainv (<a href="#Fembed_96">Fembed</a> b)) <a href="#idUpd_286">idUpd</a> c ainv -&gt;
+  	 <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> (<a href="#Fand_99">Fand</a> ainv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) q) -&gt;
+  	 <a href="#infHuA_961">infHuA</a> p u (<a href="#Swhile_139">Swhile</a> b ainv c) q
+
+| <a name="infHuA_skipseq_986">infHuA_skipseq</a>:
+  <span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, u:<a href="#upd_281">upd</a>, c :<a href="#stmt_135">stmt</a>.
+  <a href="#infHuA_961">infHuA</a> p u c q -&gt;
+  <a href="#infHuA_961">infHuA</a> p u (<a href="#Sseq_140">Sseq</a> <a href="#Sskip_136">Sskip</a> c) q
+
+| <a name="infHuA_assignseq_991">infHuA_assignseq</a>:
+<span class="keyword1">forall</span> p:<a href="#fmla_94">fmla</a>, q:<a href="#fmla_94">fmla</a>, x:<a href="#ident_15">ident</a>, e:<a href="#expr_24">expr</a>, c:<a href="#stmt_135">stmt</a>, u:<a href="#upd_281">upd</a>.
+       <a href="#infHuA_961">infHuA</a> p (<a href="#assign_425">assign</a> u x e) c q -&gt;
+       <a href="#infHuA_961">infHuA</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> x e) c) q
+
+| <a name="infHuA_ifseq_996">infHuA_ifseq</a>:
+  <span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, c1 c2 c:<a href="#stmt_135">stmt</a>, b:<a href="#bexpr_34">bexpr</a>, u:<a href="#upd_281">upd</a>.
+  	 <a href="#infHuA_961">infHuA</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fembed_96">Fembed</a> b))) u (<a href="#Sseq_140">Sseq</a> c1 c) q -&gt;
+  	 <a href="#infHuA_961">infHuA</a> (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) u (<a href="#Sseq_140">Sseq</a> c2 c) q -&gt;
+  	 <a href="#infHuA_961">infHuA</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> b c1 c2) c) q
+
+| <a name="infHuA_whileseq_1002">infHuA_whileseq</a>:
+  <span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, c cc:<a href="#stmt_135">stmt</a>, b:<a href="#bexpr_34">bexpr</a>, ainv:<a href="#fmla_94">fmla</a>, u:<a href="#upd_281">upd</a>.
+  	 <a href="#valid_fmla_119">valid_fmla</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u ainv)) -&gt;
+         <a href="#infHuA_961">infHuA</a> (<a href="#Fand_99">Fand</a> ainv (<a href="#Fembed_96">Fembed</a> b)) <a href="#idUpd_286">idUpd</a> c ainv -&gt;
+  	 <a href="#infHuA_961">infHuA</a> (<a href="#Fand_99">Fand</a> ainv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) <a href="#idUpd_286">idUpd</a> cc q -&gt;
+  	 <a href="#infHuA_961">infHuA</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Swhile_139">Swhile</a> b ainv c) cc) q
+
+| <a name="infHuA_seqseq_1009">infHuA_seqseq</a>:
+  <span class="keyword1">forall</span> p q:<a href="#fmla_94">fmla</a>, c1 c2 c:<a href="#stmt_135">stmt</a>, u:<a href="#upd_281">upd</a>.
+  	 <a href="#infHuA_961">infHuA</a> p u (<a href="#Sseq_140">Sseq</a> c1 (<a href="#Sseq_140">Sseq</a> c2 c)) q -&gt;
+  	 <a href="#infHuA_961">infHuA</a> p u (<a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> c1 c2) c) q
+
+<span class="comment">(* This system is of course sound *)</span>
+<span class="comment">(* induction_pr *)</span>
+
+<span class="keyword1">lemma</span> <a name="infHuA_sound_1019">infHuA_sound</a> : <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>, c :<a href="#stmt_135">stmt</a>.
+      <a href="#infHuA_961">infHuA</a> p u c q -&gt; <a href="#infHu_554">infHu</a> p u c q
+
+<span class="comment">(* program is well-annotated w.r.t. p, u, q *)</span>
+<span class="comment">(* if triple can be derived freely, it can be derived *)</span>
+<span class="comment">(* directed by annotated invariants *)</span>
+
+<span class="keyword1">predicate</span> <a name="ok_1028">ok</a> (p:<a href="#fmla_94">fmla</a>) (u:<a href="#upd_281">upd</a>) (c:<a href="#stmt_135">stmt</a>) (q:<a href="#fmla_94">fmla</a>) =
+	  <a href="#infHu_554">infHu</a> p u c q -&gt; <a href="#infHuA_961">infHuA</a> p u c q
+
+<span class="keyword1">end</span>
+
+<span class="keyword1">theory</span> <a name="VCGen_">VCGen</a>
+
+<span class="keyword1">use</span> <a href="#Semantics_">Semantics</a>
+<span class="keyword1">use</span> <a href="#SystemHu_">SystemHu</a>
+<span class="keyword1">use</span> <a href="#SystemHuAnnot_">SystemHuAnnot</a>
+<span class="keyword1">use</span> <a href="#HuSoundness_LF_">HuSoundness_LF</a>
+<span class="keyword1">use</span> <a href="#HuCompleteness_">HuCompleteness</a>
+<span class="keyword1">use</span> <span class="keyword1">export</span> set.<a href="set.html#Fset_">Fset</a>
+
+<span class="keyword1">predicate</span> <a name="valid_fmlas_1051">valid_fmlas</a> (g: <a href="set.html#set_118">set</a> <a href="#fmla_94">fmla</a>) = <span class="keyword1">forall</span> p :<a href="#fmla_94">fmla</a>. <a href="set.html#mem_124">mem</a> p g  -&gt; <a href="#valid_fmla_119">valid_fmla</a> p
+
+<span class="comment">(* One could write a VCGen for programs without annotations, *)</span>
+<span class="comment">(* using the wp function declared above *)</span>
+<span class="comment">(* but it could not be executed or extracted, of course *)</span>
+
+<span class="comment">(* The VCGen below cannot be written as a logic function, because *)</span>
+<span class="comment">(* termination is not established automatically *)</span>
+<span class="comment">(* thus a variant must be used. *)</span>
+<span class="comment">(* This is the only reason why it is a program function, *)</span>
+<span class="comment">(* since it is not meant, in this version, to be executed. *)</span>
+<span class="comment">(* But it must be ghost, since it modifies updates through *)</span>
+<span class="comment">(* the assign function, which uses the ghost function Map.set *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <span class="keyword1">ghost</span> <span class="keyword1">function</span> <a name="vcgen_l_1070">vcgen_l</a> (p:<a href="#fmla_94">fmla</a>) (u:<a href="#upd_281">upd</a>) (c:<a href="#stmt_135">stmt</a>) (q:<a href="#fmla_94">fmla</a>) : <a href="set.html#set_118">set</a> <a href="#fmla_94">fmla</a> =
+    <span class="keyword2">ensures</span> { <a href="#valid_fmlas_1051">valid_fmlas</a> result -&gt; <a href="#infHuA_961">infHuA</a> p u c q }
+    <span class="comment">(* ensures { valid_fmlas result -&gt; infHu p u c q } *)</span>
+    <span class="comment">(* ensures { valid_fmlas result -&gt; valid_triple p u c q } *)</span>
+    <span class="keyword2">ensures</span> { <a href="#infHuA_961">infHuA</a> p u c q -&gt; <a href="#valid_fmlas_1051">valid_fmlas</a> result }
+    <span class="keyword2">variant</span> { <a href="#size_147">size</a> c }
+<span class="keyword1">match</span> c <span class="keyword1">with</span>
+      | <a href="#Sskip_136">Sskip</a> -&gt; <a href="set.html#singleton_154">singleton</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u q))
+      | <a href="#Sassign_137">Sassign</a> x e -&gt; <a href="set.html#singleton_154">singleton</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> (<a href="#assign_425">assign</a> u x e) q))
+      | <a href="#Sif_138">Sif</a> b c1 c2 -&gt; <a href="set.html#union_170">union</a> (vcgen_l (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fembed_96">Fembed</a> b))) u c1 q)
+      	      	       	    (vcgen_l (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) u c2 q)
+      | <a href="#Swhile_139">Swhile</a> b ainv cb -&gt; <a href="set.html#add_151">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u ainv))
+      	  	    	         (<a href="set.html#add_151">add</a> (<a href="#Fimplies_102">Fimplies</a> (<a href="#Fand_99">Fand</a> ainv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) q)
+				      (vcgen_l (<a href="#Fand_99">Fand</a> ainv (<a href="#Fembed_96">Fembed</a> b)) <a href="#idUpd_286">idUpd</a> cb ainv))
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Sskip_136">Sskip</a>) cc -&gt; vcgen_l p u cc q
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> x e) cc -&gt; vcgen_l p (<a href="#assign_425">assign</a> u x e) cc q
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> b c1 c2) cc -&gt; <a href="set.html#union_170">union</a> (vcgen_l (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fembed_96">Fembed</a> b))) u (<a href="#Sseq_140">Sseq</a> c1 cc) q)
+      	      	     	       	        (vcgen_l (<a href="#Fand_99">Fand</a> p (<a href="#applyF_386">applyF</a> u (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) u (<a href="#Sseq_140">Sseq</a> c2 cc) q)
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Swhile_139">Swhile</a> b ainv cb) cc -&gt; <a href="set.html#add_151">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u ainv))
+      	  	    	       	    	  (<a href="set.html#union_170">union</a> (vcgen_l (<a href="#Fand_99">Fand</a> ainv (<a href="#Fembed_96">Fembed</a> b)) <a href="#idUpd_286">idUpd</a> cb ainv)
+      			     	       	         (vcgen_l (<a href="#Fand_99">Fand</a> ainv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) <a href="#idUpd_286">idUpd</a> cc q))
+      |	<a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> c1 c2) cc -&gt; vcgen_l p u (<a href="#Sseq_140">Sseq</a> c1 (<a href="#Sseq_140">Sseq</a> c2 cc)) q
+<span class="keyword1">end</span>
+
+<span class="keyword1">lemma</span> <a name="vcgen_sound_1096">vcgen_sound</a> : <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>, c :<a href="#stmt_135">stmt</a>.
+      <a href="#valid_fmlas_1051">valid_fmlas</a> (<a href="#vcgen_l_1070">vcgen_l</a> p u c q) -&gt; <a href="#valid_triple_485">valid_triple</a> p u c q
+
+<span class="keyword1">lemma</span> <a name="vcgen_cmplt_1099">vcgen_cmplt</a> : <span class="keyword1">forall</span> p q :<a href="#fmla_94">fmla</a>, u :<a href="#upd_281">upd</a>, c :<a href="#stmt_135">stmt</a>.
+     (<a href="#valid_triple_485">valid_triple</a> p u c q) /\ (<a href="#ok_1028">ok</a> p u c q) -&gt; <a href="#valid_fmlas_1051">valid_fmlas</a> (<a href="#vcgen_l_1070">vcgen_l</a> p u c q)
+
+<span class="keyword1">end</span>
+
+<span class="keyword1">module</span> <a name="VCGenExtr_">VCGenExtr</a>
+
+<span class="keyword1">use</span> <a href="#Semantics_">Semantics</a>
+<span class="keyword1">use</span> <a href="#SystemHu_">SystemHu</a>
+<span class="keyword1">use</span> <a href="#SystemHuAnnot_">SystemHuAnnot</a>
+<span class="keyword1">use</span> <a href="#VCGen_">VCGen</a>
+
+<span class="keyword1">use</span> option.<a href="option.html#Option_">Option</a>
+
+<span class="comment">(* We will now use Impmaps to implement abstract maps *)</span>
+<span class="comment">(* The .contents field is abstract and thus can be accessed *)</span>
+<span class="comment">(* in logic / annotations / ghost code *)</span>
+<span class="comment">(* But not in programs: they must access impmaps through the API [vals] *)</span>
+
+<span class="keyword1">clone</span> impmap.<a href="impmap.html#Impmap_">Impmap</a> <span class="keyword1">with</span> <span class="keyword1">type</span> <a href="impmap.html#key_12">key</a> = <a href="#ident_15">ident</a>
+<span class="keyword1">type</span> <a name="impupd_1127">impupd</a> = Impmap.<a href="#t_14">t</a> <a href="#expr_24">expr</a>
+
+<span class="comment">(* function to convert impupdates to abstract updates *)</span>
+<span class="comment">(* pure; will only be used in annotations *)</span>
+
+<span class="keyword1">function</span> <a name="impupd2upd_1134">impupd2upd</a> (iu :<a href="#impupd_1127">impupd</a>) : <a href="#upd_281">upd</a> =
+	 <span class="keyword1">fun</span> (x: <a href="#ident_15">ident</a>) -&gt; <span class="keyword1">match</span> iu.<a href="#contents_15">contents</a>[x] <span class="keyword1">with</span>
+	     	 	   	 | <a href="option.html#None_5">None</a> -&gt; <a href="#Evar_26">Evar</a> x
+	       	  	   	 | <a href="option.html#Some_5">Some</a> e -&gt; e
+				 <span class="keyword1">end</span>
+
+<span class="keyword1">let</span> <span class="keyword1">function</span> <a name="idImpUpd_1142">idImpUpd</a> () : <a href="#impupd_1127">impupd</a> =
+    <span class="keyword2">ensures</span> { <a href="#impupd2upd_1134">impupd2upd</a> result = <a href="#idUpd_286">idUpd</a> }
+<a href="#empty_18">empty</a>()
+
+<span class="comment">(* The API in the library does not contain a copy function *)</span>
+<span class="comment">(* nor a function returning the domain of an impmap. *)</span>
+<span class="comment">(* We need such a function, so we must write its contract, *)</span>
+<span class="comment">(* but we cannot implement it since we have no access to the domain *)</span>
+
+<span class="keyword1">val</span> <a name="copy_1152">copy</a> (u :<a href="#impupd_1127">impupd</a>) : <a href="#impupd_1127">impupd</a>
+    <span class="keyword2">ensures</span> { u = <span class="keyword1">old</span> u }
+    <span class="keyword2">ensures</span> { result &lt;&gt; u /\ <a href="#impupd2upd_1134">impupd2upd</a> result = <a href="#impupd2upd_1134">impupd2upd</a> u }
+
+<span class="comment">(* The following functions lift to impupd functions *)</span>
+<span class="comment">(* already defined for upd, with adequate contracts *)</span>
+<span class="comment">(* that are proved trivially *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <a name="impapplyE_1164">impapplyE</a> (iu : <a href="#impupd_1127">impupd</a>) (e: <a href="#expr_24">expr</a>) : <a href="#expr_24">expr</a> =
+    <span class="keyword2">ensures</span> { result = <a href="#applyE_306">applyE</a> (<a href="#impupd2upd_1134">impupd2upd</a> iu) e }
+    <span class="keyword2">variant</span> { e }
+<span class="keyword1">match</span> e <span class="keyword1">with</span>
+      | <a href="#Econst_25">Econst</a> n -&gt; <a href="#Econst_25">Econst</a> n
+      | <a href="#Evar_26">Evar</a> x -&gt; <span class="keyword1">if</span> <a href="#mem_24">mem</a> x iu <span class="keyword1">then</span> <a href="#get_27">get</a> x iu
+	     	  <span class="keyword1">else</span> <a href="#Evar_26">Evar</a> x
+      | <a href="#Ebin_27">Ebin</a> e1 op e2 -&gt; <a href="#Ebin_27">Ebin</a> (impapplyE iu e1) op (impapplyE iu e2)
+<span class="keyword1">end</span>
+
+<span class="comment">(* this program function adds a pair (x,e) to an imp. update *)</span>
+
+<span class="keyword1">let</span> <a name="impassign_1178">impassign</a> (iu: <a href="#impupd_1127">impupd</a>) (x: <a href="#ident_15">ident</a>) (e: <a href="#expr_24">expr</a>) =
+    <span class="keyword2">ensures</span> { <a href="#impupd2upd_1134">impupd2upd</a> iu = <a href="#assign_425">assign</a> (<a href="#impupd2upd_1134">impupd2upd</a> (<span class="keyword1">old</span> iu)) x e }
+<a href="#add_41">add</a> x (<a href="#impapplyE_1164">impapplyE</a> iu e) iu
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <a name="impapplyB_1183">impapplyB</a> (iu: <a href="#impupd_1127">impupd</a>) (b: <a href="#bexpr_34">bexpr</a>) : <a href="#bexpr_34">bexpr</a> =
+    <span class="keyword2">ensures</span> { result = <a href="#applyB_351">applyB</a> (<a href="#impupd2upd_1134">impupd2upd</a> iu) b }
+    <span class="keyword2">variant</span> { b }
+<span class="keyword1">match</span> b <span class="keyword1">with</span>
+      | <a href="#Bcomp_35">Bcomp</a> e1 bop e2 -&gt; <a href="#Bcomp_35">Bcomp</a> (<a href="#impapplyE_1164">impapplyE</a> iu e1) bop (<a href="#impapplyE_1164">impapplyE</a> iu e2)
+      | <a href="#Btrue_36">Btrue</a> -&gt; <a href="#Btrue_36">Btrue</a>
+      | <a href="#Bfalse_37">Bfalse</a> -&gt; <a href="#Bfalse_37">Bfalse</a>
+      | <a href="#Band_38">Band</a> b1 b2 -&gt; <a href="#Band_38">Band</a> (impapplyB iu b1) (impapplyB iu b2)
+      | <a href="#Bor_39">Bor</a> b1 b2 -&gt; <a href="#Bor_39">Bor</a> (impapplyB iu b1) (impapplyB iu b2)
+      | <a href="#Bnot_40">Bnot</a> b1 -&gt; <a href="#Bnot_40">Bnot</a> (impapplyB iu b1)
+<span class="keyword1">end</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <a name="impapplyF_1196">impapplyF</a> (iu: <a href="#impupd_1127">impupd</a>) (p: <a href="#fmla_94">fmla</a>) : <a href="#fmla_94">fmla</a> =
+    <span class="keyword2">ensures</span> { result = <a href="#applyF_386">applyF</a> (<a href="#impupd2upd_1134">impupd2upd</a> iu) p }
+    <span class="keyword2">variant</span> { p }
+<span class="keyword1">match</span> p <span class="keyword1">with</span>
+      | <a href="#Fcomp_95">Fcomp</a> e1 bop e2 -&gt; <a href="#Fcomp_95">Fcomp</a> (<a href="#impapplyE_1164">impapplyE</a> iu e1) bop (<a href="#impapplyE_1164">impapplyE</a> iu e2)
+      | <a href="#Fembed_96">Fembed</a> b -&gt;  <a href="#Fembed_96">Fembed</a> (<a href="#impapplyB_1183">impapplyB</a> iu b)
+      | <a href="#Ftrue_97">Ftrue</a> -&gt; <a href="#Ftrue_97">Ftrue</a>
+      | <a href="#Ffalse_98">Ffalse</a> -&gt; <a href="#Ffalse_98">Ffalse</a>
+      | <a href="#Fand_99">Fand</a> p1 p2 -&gt;  <a href="#Fand_99">Fand</a> (impapplyF iu p1) (impapplyF iu p2)
+      | <a href="#For_100">For</a> p1 p2 -&gt;  <a href="#For_100">For</a> (impapplyF iu p1) (impapplyF iu p2)
+      | <a href="#Fnot_101">Fnot</a> p1 -&gt; <a href="#Fnot_101">Fnot</a> (impapplyF iu p1)
+      | <a href="#Fimplies_102">Fimplies</a> p1 p2 -&gt; <a href="#Fimplies_102">Fimplies</a> (impapplyF iu p1) (impapplyF iu p2)
+<span class="keyword1">end</span>
+
+<span class="comment">(* An implementation type for sets must also be used *)</span>
+
+<span class="keyword1">clone</span> impset.<a href="impset.html#Impset_">Impset</a> <span class="keyword1">with</span> <span class="keyword1">type</span> <a href="impset.html#elt_8">elt</a> = <a href="#fmla_94">fmla</a>
+<span class="keyword1">type</span> <a name="vcSet_1215">vcSet</a> = Impset.<a href="#t_10">t</a>
+
+<span class="comment">(* function to convert impsets to abstract sets *)</span>
+<span class="comment">(* unlike impmaps, it suffices to return the abstract contents *)</span>
+
+<span class="keyword1">function</span> <a name="impset2set_1221">impset2set</a> (vcs :<a href="#vcSet_1215">vcSet</a>) : <a href="set.html#set_118">set</a> <a href="#fmla_94">fmla</a> = vcs.<a href="#contents_10">contents</a>
+
+<span class="comment">(* Function to add elements of a set to another *)</span>
+
+<span class="keyword1">val</span> <a name="addSet_1226">addSet</a> (s':<a href="#vcSet_1215">vcSet</a>) (s:<a href="#vcSet_1215">vcSet</a>): unit
+    <span class="keyword2">writes</span>  { s }
+    <span class="keyword2">ensures</span> { s.<a href="#contents_10">contents</a> = <a href="set.html#union_170">union</a> (<a href="#impset2set_1221">impset2set</a> s') (<a href="#impset2set_1221">impset2set</a> (<span class="keyword1">old</span> s)) }
+
+<span class="comment">(* vcgen_l serves as reference for the executable one below *)</span>
+<span class="comment">(* Note the use of copies of imp. updates when handling branching *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <a name="vcgen_1237">vcgen</a> (p:<a href="#fmla_94">fmla</a>) (iu:<a href="#impupd_1127">impupd</a>) (c:<a href="#stmt_135">stmt</a>) (q:<a href="#fmla_94">fmla</a>) : <a href="#vcSet_1215">vcSet</a> =
+    <span class="keyword2">ensures</span> { <a href="#impset2set_1221">impset2set</a> result <a href="set.html#infix%20==_127">==</a> <a href="#vcgen_l_1070">vcgen_l</a> p (<a href="#impupd2upd_1134">impupd2upd</a> (<span class="keyword1">old</span> iu)) c q }
+    <span class="keyword2">variant</span> { <a href="#size_147">size</a> c }
+<span class="keyword1">let</span> vcs = <a href="#empty_12">empty</a>() <span class="keyword1">in</span>
+<span class="keyword1">match</span> c <span class="keyword1">with</span>
+      | <a href="#Sskip_136">Sskip</a> -&gt; <a href="#add_25">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#impapplyF_1196">impapplyF</a> iu q)) vcs;
+      	      	 vcs
+      | <a href="#Sassign_137">Sassign</a> x e -&gt; <a href="#impassign_1178">impassign</a> iu x e;
+      		       <a href="#add_25">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#impapplyF_1196">impapplyF</a> iu q)) vcs;
+      	      	       vcs
+      | <a href="#Sif_138">Sif</a> b c1 c2 -&gt; <span class="keyword1">let</span> iu1 = <a href="#copy_1152">copy</a> iu <span class="keyword1">in</span>
+		       <a href="#addSet_1226">addSet</a> (vcgen (<a href="#Fand_99">Fand</a> p (<a href="#impapplyF_1196">impapplyF</a> iu (<a href="#Fembed_96">Fembed</a> b))) iu c1 q) vcs;
+      	      	       <a href="#addSet_1226">addSet</a> (vcgen (<a href="#Fand_99">Fand</a> p (<a href="#impapplyF_1196">impapplyF</a> iu1 (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) iu1 c2 q) vcs;
+      	      	       vcs
+      | <a href="#Swhile_139">Swhile</a> b ainv cb -&gt; <a href="#add_25">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#impapplyF_1196">impapplyF</a> iu ainv)) vcs;
+			    <a href="#addSet_1226">addSet</a> (vcgen (<a href="#Fand_99">Fand</a> ainv (<a href="#Fembed_96">Fembed</a> b)) (<a href="#idImpUpd_1142">idImpUpd</a>()) cb ainv) vcs;
+      	  	    	    <a href="#add_25">add</a> (<a href="#Fimplies_102">Fimplies</a> (<a href="#Fand_99">Fand</a> ainv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) q) vcs;
+      	      	 	    vcs
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Sskip_136">Sskip</a>) cc -&gt; <a href="#addSet_1226">addSet</a> (vcgen p iu cc q) vcs;
+      	      	     	   vcs
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> x e) cc -&gt; <a href="#impassign_1178">impassign</a> iu x e;
+      	      	       	         <a href="#addSet_1226">addSet</a> (vcgen p iu cc q) vcs;
+      	      			 vcs
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> b c1 c2) cc -&gt; <span class="keyword1">let</span> iu1 = <a href="#copy_1152">copy</a> iu <span class="keyword1">in</span>
+				 <a href="#addSet_1226">addSet</a> (vcgen  (<a href="#Fand_99">Fand</a> p (<a href="#impapplyF_1196">impapplyF</a> iu (<a href="#Fembed_96">Fembed</a> b))) iu (<a href="#Sseq_140">Sseq</a> c1 cc) q) vcs;
+      	      	     	       	 <a href="#addSet_1226">addSet</a> (vcgen (<a href="#Fand_99">Fand</a> p (<a href="#impapplyF_1196">impapplyF</a> iu1 (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) iu1 (<a href="#Sseq_140">Sseq</a> c2 cc) q) vcs;
+      	      			 vcs
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Swhile_139">Swhile</a> b ainv cb) cc -&gt; <a href="#add_25">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#impapplyF_1196">impapplyF</a> iu ainv)) vcs;
+      	  	    	       	      <a href="#addSet_1226">addSet</a> (vcgen (<a href="#Fand_99">Fand</a> ainv (<a href="#Fembed_96">Fembed</a> b)) (<a href="#idImpUpd_1142">idImpUpd</a>()) cb ainv) vcs;
+      			     	      <a href="#addSet_1226">addSet</a> (vcgen (<a href="#Fand_99">Fand</a> ainv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) (<a href="#idImpUpd_1142">idImpUpd</a>()) cc q) vcs;
+      	      			      vcs
+      |	<a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> c1 c2) cc -&gt; <a href="#addSet_1226">addSet</a> (vcgen p iu (<a href="#Sseq_140">Sseq</a> c1 (<a href="#Sseq_140">Sseq</a> c2 cc)) q) vcs;
+      	      	      	     	vcs
+<span class="keyword1">end</span>
+
+<span class="comment">(* Alternative VCGen function for implementation *)</span>
+<span class="comment">(* This dispenses with vcgen_l entirely, since it includes ghost code *)</span>
+<span class="comment">(* to keep track of the correspondence with functional updates and sets *)</span>
+
+<span class="keyword1">let</span> <span class="keyword1">rec</span> <a name="vcgen_g_1281">vcgen_g</a> (p:<a href="#fmla_94">fmla</a>) (iu:<a href="#impupd_1127">impupd</a>) (<span class="keyword1">ghost</span> u:<a href="#upd_281">upd</a>) (c:<a href="#stmt_135">stmt</a>) (q:<a href="#fmla_94">fmla</a>) : (vc :<a href="#vcSet_1215">vcSet</a>, <span class="keyword1">ghost</span> gvc :<a href="set.html#set_118">set</a> <a href="#fmla_94">fmla</a>) =
+    <span class="keyword2">requires</span> { u = <a href="#impupd2upd_1134">impupd2upd</a> iu }
+    <span class="keyword2">ensures</span> { <a href="#infHuA_961">infHuA</a> p u c q &lt;-&gt; <a href="#valid_fmlas_1051">valid_fmlas</a> gvc }
+    <span class="keyword2">ensures</span> { <a href="#impset2set_1221">impset2set</a> vc <a href="set.html#infix%20==_127">==</a> gvc  }
+    <span class="keyword2">variant</span> { <a href="#size_147">size</a> c }
+<span class="keyword1">let</span> vcs = <a href="#empty_12">empty</a>() <span class="keyword1">in</span>
+<span class="keyword1">match</span> c <span class="keyword1">with</span>
+      | <a href="#Sskip_136">Sskip</a> -&gt; <a href="#add_25">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#impapplyF_1196">impapplyF</a> iu q)) vcs;
+      	      	 vcs, <a href="set.html#singleton_154">singleton</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u q))
+      | <a href="#Sassign_137">Sassign</a> x e -&gt; <a href="#impassign_1178">impassign</a> iu x e;
+      		       <a href="#add_25">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#impapplyF_1196">impapplyF</a> iu q)) vcs;
+      	      	       vcs, <a href="set.html#singleton_154">singleton</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> (<a href="#assign_425">assign</a> u x e) q))
+      | <a href="#Sif_138">Sif</a> b c1 c2 -&gt; <span class="keyword1">let</span> iu1 = <a href="#copy_1152">copy</a> iu <span class="keyword1">in</span>
+                       <span class="keyword1">let</span> vc1, gvc1 = vcgen_g (<a href="#Fand_99">Fand</a> p (<a href="#impapplyF_1196">impapplyF</a> iu (<a href="#Fembed_96">Fembed</a> b))) iu u c1 q <span class="keyword1">in</span>
+		       <span class="keyword1">let</span> vc2, gvc2 = vcgen_g (<a href="#Fand_99">Fand</a> p (<a href="#impapplyF_1196">impapplyF</a> iu1 (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) iu1 u c2 q <span class="keyword1">in</span>
+		       <a href="#addSet_1226">addSet</a> vc1 vcs;
+      	      	       <a href="#addSet_1226">addSet</a> vc2 vcs;
+      	      	       vcs, <a href="set.html#union_170">union</a> gvc1 gvc2
+      | <a href="#Swhile_139">Swhile</a> b ainv cb -&gt; <span class="keyword1">let</span> vc, gvc = vcgen_g (<a href="#Fand_99">Fand</a> ainv (<a href="#Fembed_96">Fembed</a> b)) (<a href="#idImpUpd_1142">idImpUpd</a>()) <a href="#idUpd_286">idUpd</a> cb ainv <span class="keyword1">in</span>
+                            <a href="#add_25">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#impapplyF_1196">impapplyF</a> iu ainv)) vcs;
+      			    <a href="#addSet_1226">addSet</a> vc vcs;
+      	  	    	    <a href="#add_25">add</a> (<a href="#Fimplies_102">Fimplies</a> (<a href="#Fand_99">Fand</a> ainv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) q) vcs;
+      	      	 	    vcs, (Fset.<a href="set.html#add_151">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u ainv))
+      	  	    	                   (Fset.<a href="set.html#add_151">add</a> (<a href="#Fimplies_102">Fimplies</a> (<a href="#Fand_99">Fand</a> ainv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) q) gvc))
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Sskip_136">Sskip</a>) cc -&gt; <span class="keyword1">let</span> vc, gvc = vcgen_g p iu u cc q <span class="keyword1">in</span>
+      	     	     	   <a href="#addSet_1226">addSet</a> vc vcs;
+      	     	     	   vcs, gvc
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> x e) cc -&gt; <a href="#impassign_1178">impassign</a> iu x e;
+      	      	       	         <span class="keyword1">let</span> vc, gvc = vcgen_g p iu (<a href="#assign_425">assign</a> u x e) cc q <span class="keyword1">in</span>
+      	      	       	         <a href="#addSet_1226">addSet</a> vc vcs;
+      	      			 vcs, gvc
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Sif_138">Sif</a> b c1 c2) cc -&gt; <span class="keyword1">let</span> iu1 = <a href="#copy_1152">copy</a> iu <span class="keyword1">in</span>
+                                 <span class="keyword1">let</span> vc1, gvc1 = vcgen_g (<a href="#Fand_99">Fand</a> p (<a href="#impapplyF_1196">impapplyF</a> iu (<a href="#Fembed_96">Fembed</a> b))) iu u (<a href="#Sseq_140">Sseq</a> c1 cc) q <span class="keyword1">in</span>
+      		                 <span class="keyword1">let</span> vc2, gvc2 = vcgen_g (<a href="#Fand_99">Fand</a> p (<a href="#impapplyF_1196">impapplyF</a> iu1 (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b)))) iu1 u (<a href="#Sseq_140">Sseq</a> c2 cc) q <span class="keyword1">in</span>
+				 <a href="#addSet_1226">addSet</a> vc1 vcs;
+      	      	     	       	 <a href="#addSet_1226">addSet</a> vc2 vcs;
+      	      			 vcs, <a href="set.html#union_170">union</a> gvc1 gvc2
+      | <a href="#Sseq_140">Sseq</a> (<a href="#Swhile_139">Swhile</a> b ainv cb) cc -&gt; <span class="keyword1">let</span> vc, gvc = vcgen_g (<a href="#Fand_99">Fand</a> ainv (<a href="#Fembed_96">Fembed</a> b)) (<a href="#idImpUpd_1142">idImpUpd</a>()) <a href="#idUpd_286">idUpd</a> cb ainv <span class="keyword1">in</span>
+                            	      <span class="keyword1">let</span> vcc, gvcc = vcgen_g (<a href="#Fand_99">Fand</a> ainv (<a href="#Fnot_101">Fnot</a> (<a href="#Fembed_96">Fembed</a> b))) (<a href="#idImpUpd_1142">idImpUpd</a>()) <a href="#idUpd_286">idUpd</a> cc q <span class="keyword1">in</span>
+				      <a href="#add_25">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#impapplyF_1196">impapplyF</a> iu ainv)) vcs;
+      	  	    	       	      <a href="#addSet_1226">addSet</a> vc vcs;
+				      <a href="#addSet_1226">addSet</a> vcc vcs;
+      			              vcs, Fset.<a href="set.html#add_151">add</a> (<a href="#Fimplies_102">Fimplies</a> p (<a href="#applyF_386">applyF</a> u ainv)) (<a href="set.html#union_170">union</a> gvc gvcc)
+      |	<a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> c1 c2) cc -&gt; <span class="keyword1">let</span> vc, gvc = vcgen_g p iu u (<a href="#Sseq_140">Sseq</a> c1 (<a href="#Sseq_140">Sseq</a> c2 cc)) q <span class="keyword1">in</span>
+      	     	     	        <a href="#addSet_1226">addSet</a> vc vcs;
+      	     	     	        vcs, gvc
+<span class="keyword1">end</span>
+
+<span class="comment">(* main VCGen function, initializes updates as empty *)</span>
+
+<span class="keyword1">let</span> <a name="vcgen_main_1334">vcgen_main</a> (p:<a href="#fmla_94">fmla</a>) (c:<a href="#stmt_135">stmt</a>) (q:<a href="#fmla_94">fmla</a>) =
+    <span class="keyword2">ensures</span> { <a href="#valid_fmlas_1051">valid_fmlas</a> (<a href="#impset2set_1221">impset2set</a> result) -&gt; <a href="#valid_triple_485">valid_triple</a> p <a href="#idUpd_286">idUpd</a> c q }
+    <span class="keyword2">ensures</span> { <a href="#valid_triple_485">valid_triple</a> p <a href="#idUpd_286">idUpd</a> c q /\ <a href="#ok_1028">ok</a> p <a href="#idUpd_286">idUpd</a> c q -&gt; <a href="#valid_fmlas_1051">valid_fmlas</a> (<a href="#impset2set_1221">impset2set</a> result) }
+<span class="keyword1">let</span> (vc, _) =  <a href="#vcgen_g_1281">vcgen_g</a> (p:<a href="#fmla_94">fmla</a>) (<a href="#idImpUpd_1142">idImpUpd</a>()) <a href="#idUpd_286">idUpd</a> (c:<a href="#stmt_135">stmt</a>) (q:<a href="#fmla_94">fmla</a>)
+<span class="keyword1">in</span> vc
+
+<span class="keyword1">let</span> <a name="test_vcg_1343">test_vcg</a> () =
+    <span class="keyword1">let</span> x = <a href="#MkIdent_16">MkIdent</a> 0 <span class="keyword1">in</span>
+    <span class="keyword1">let</span> y = <a href="#MkIdent_16">MkIdent</a> 1 <span class="keyword1">in</span>
+    <span class="keyword1">let</span> t = <a href="#MkIdent_16">MkIdent</a> 2 <span class="keyword1">in</span>
+    <span class="keyword1">let</span> a = <a href="#MkIdent_16">MkIdent</a> 3 <span class="keyword1">in</span>
+    <span class="keyword1">let</span> b = <a href="#MkIdent_16">MkIdent</a> 4 <span class="keyword1">in</span>
+    <span class="keyword1">let</span> swap = <a href="#Sseq_140">Sseq</a> (<a href="#Sseq_140">Sseq</a> (<a href="#Sassign_137">Sassign</a> t (<a href="#Evar_26">Evar</a> x))
+     	      	     	    (<a href="#Sassign_137">Sassign</a> x (<a href="#Evar_26">Evar</a> y)))
+		     (<a href="#Sassign_137">Sassign</a> y (<a href="#Evar_26">Evar</a> t)) <span class="keyword1">in</span>
+    <span class="keyword1">let</span> p = <a href="#Fand_99">Fand</a> (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> x) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> a)) (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> b)) <span class="keyword1">in</span>
+    <span class="keyword1">let</span> q = <a href="#Fand_99">Fand</a> (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> y) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> a)) (<a href="#Fcomp_95">Fcomp</a> (<a href="#Evar_26">Evar</a> x) <a href="#BOeq_32">BOeq</a> (<a href="#Evar_26">Evar</a> b)) <span class="keyword1">in</span>
+    <a href="#vcgen_main_1334">vcgen_main</a> p swap q
+
+<span class="keyword1">end</span>
+
+</pre>
+
+</div>
+<hr>
+<p>Generated by why3doc 1.2.0</p>
+</body>
+</html>
