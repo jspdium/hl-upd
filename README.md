@@ -10,7 +10,6 @@
   * Prove soundness and completeness of the VCGen
 
 
-
 *  Why3: a sweet spot, in terms of expressivity of logic language, degree of automation, and proof management, for formalizing  different notions involved in program verification 
 
 *  As a case study, we consider a non-standard version of Hoare logic for While programs, based on the notion of update (a notion which is also used in the JavaDL logic of the KeY tool)
