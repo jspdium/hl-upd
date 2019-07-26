@@ -5,9 +5,9 @@
 *  More and more, new formalisms and verification techniques are expected to be formalized, and meta-properties proved with a proof assistant or similar tool (and made available to the community)
     
 *  General programme: given a programming language and a program logic for that language, we aim to 
-  * Prove soundness and (some notion of) completeness of the logic w.r.t to the programming language semantics 
-  * Write a Verification Conditions Generator for the logic: an algorithm that, given a program and a specification, outputs a set of first-order proof obligations
-  * Prove soundness and completeness of the VCGen
+   - Prove soundness and (some notion of) completeness of the logic w.r.t to the programming language semantics 
+   - Write a Verification Conditions Generator for the logic: an algorithm that, given a program and a specification, outputs a set of first-order proof obligations
+   - Prove soundness and completeness of the VCGen
 
 
 *  Why3: a sweet spot, in terms of expressivity of logic language, degree of automation, and proof management, for formalizing  different notions involved in program verification 
